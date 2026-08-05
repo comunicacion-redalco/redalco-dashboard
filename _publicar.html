@@ -950,6 +950,21 @@ textarea.notas { min-height: 62px; resize: vertical; font-size: 13.5px; }
   font-variant-numeric: tabular-nums;
 }
 .fc-m span { font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--tinta-suave); }
+
+.lista-segmentos { display: flex; flex-direction: column; }
+.seg-fila {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 13px 20px;
+  border-top: 1px solid var(--linea-suave);
+  flex-wrap: wrap;
+}
+.seg-fila:first-child { border-top: none; }
+.seg-fila-n { font-size: 12.5px; color: var(--tinta-suave); flex: 1; min-width: 90px; }
+.seg-fila-m { font-size: 13px; color: var(--tinta-media); }
+.seg-fila-m b { color: var(--verde); font-variant-numeric: tabular-nums; }
+
 .fc-generado {
   text-align: center;
   font-size: 12px;
@@ -1268,6 +1283,7 @@ textarea.notas { min-height: 62px; resize: vertical; font-size: 13.5px; }
           <button class="vista-btn activo" data-vista="mes">Mails</button>
           <button class="vista-btn" data-vista="calendario">Calendario</button>
           <button class="vista-btn" data-vista="playbook">Playbook</button>
+          <button class="vista-btn" data-vista="metricas">Métricas</button>
         </nav>
         <span class="barra-sep"></span>
         <button class="btn-portada" id="btn-portada">Volver a la portada</button>
@@ -1301,6 +1317,7 @@ textarea.notas { min-height: 62px; resize: vertical; font-size: 13.5px; }
     <main class="contenido" id="contenido"></main>
     <main class="contenido" id="contenido-calendario" hidden></main>
     <main class="contenido" id="contenido-playbook" hidden></main>
+    <main class="contenido" id="contenido-metricas" hidden></main>
 
     <footer class="footer">
       <span>Todo se guarda en este navegador. Si limpiás el caché, se pierde: bajá el respaldo cada tanto.</span>
@@ -3771,10 +3788,19 @@ function renderPlaybook() {
 let historico = null;
 let historicoCargando = false;
 
-async function cargarHistorico(forzar) {
-  if (historico && !forzar) { render(); return; }
-  historicoCargando = true;
+/* render() actualiza el mes actual (si es "pasado") y renderMetricasHTML()
+   la pestaña Métricas — se llaman las dos sin condicionar por cuál está
+   visible, es más simple que rastrear la vista activa y no cuesta nada
+   redibujar un contenedor oculto. */
+function redibujarVistasConHistorico() {
   render();
+  renderMetricasHTML();
+}
+
+async function cargarHistorico(forzar) {
+  if (historico && !forzar) { redibujarVistasConHistorico(); return; }
+  historicoCargando = true;
+  redibujarVistasConHistorico();
   try {
     const resp = await fetch('/api/metricas', { cache: 'no-store' });
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
@@ -3783,7 +3809,7 @@ async function cargarHistorico(forzar) {
     historico = { error: true, mensaje: e.message };
   }
   historicoCargando = false;
-  render();
+  redibujarVistasConHistorico();
 }
 
 function filaCampana(c) {
@@ -3872,18 +3898,155 @@ function renderMesPasado(mes) {
     { duration: 0.45, delay: escalonar(0.05), ease: SALIDA });
 }
 
+/* -------------------------------------------------------------- MÉTRICAS */
+
+/* Todo lo mandado desde enero 2026 (Mailchimp + EmailOctopus), general y
+   por segmento. Mismo fetch/caché de 5h que los meses pasados — comparten
+   `historico`, así que si ya se cargó en otra vista no se vuelve a pedir. */
+
+function todasLasCampanas() {
+  if (!historico || historico.error) return [];
+  const mc = (historico.mailchimp || []).map(c => Object.assign({ plataforma: 'Mailchimp' }, c));
+  const eo = (historico.emailoctopus || []).map(c => Object.assign({ plataforma: 'EmailOctopus' }, c));
+  return mc.concat(eo);
+}
+
+function promedio(valores) {
+  const v = valores.filter(x => x !== null && x !== undefined);
+  if (!v.length) return null;
+  return v.reduce((a, b) => a + b, 0) / v.length;
+}
+
+function filaSegmentoMetricas(g) {
+  const seg = g.k === '_sin' ? null : SEGMENTOS[g.k];
+  const nombre = seg ? seg.icono + ' ' + seg.nombre : 'Sin identificar';
+  const clase = seg ? 'fc-seg-' + seg.color : 'fc-seg-desconocido';
+  const ap = promedio(g.item.map(c => c.tasaApertura));
+  const cl = promedio(g.item.map(c => c.tasaClics));
+  return '<div class="seg-fila">' +
+    '<span class="fc-seg ' + clase + '">' + esc(nombre) + '</span>' +
+    '<span class="seg-fila-n">' + g.item.length + (g.item.length === 1 ? ' campaña' : ' campañas') + '</span>' +
+    '<span class="seg-fila-m"><b>' + fmtPct(ap !== null ? ap * 100 : null) + '</b> apertura prom.</span>' +
+    '<span class="seg-fila-m"><b>' + fmtPct(cl !== null ? cl * 100 : null) + '</b> clics prom.</span>' +
+  '</div>';
+}
+
+function filaRankingMetricas(c) {
+  return '<div class="fila-campana">' +
+    '<div class="fc-asunto">' + esc(c.asunto) +
+      '<span class="fc-fecha">' + esc(fmtFecha(c.fechaEnvio ? c.fechaEnvio.slice(0, 10) : null) || '') +
+        ' · ' + esc(c.plataforma) + '</span>' +
+    '</div>' +
+    '<div class="fc-metricas">' +
+      '<div class="fc-m"><b>' + fmtPct(c.tasaApertura * 100) + '</b><span>Apertura</span></div>' +
+      '<div class="fc-m"><b>' + fmtNum(c.aperturasUnicas) + '</b><span>Aperturas</span></div>' +
+      '<div class="fc-m"><b>' + fmtNum(c.clicsUnicos) + '</b><span>Clics</span></div>' +
+    '</div>' +
+  '</div>';
+}
+
+function renderMetricasHTML() {
+  const cont = document.getElementById('contenido-metricas');
+  if (!cont) return;
+
+  if (historicoCargando) {
+    cont.innerHTML = '<div class="foco-mes"><div class="foco-texto"><h2>Métricas de mails</h2>' +
+      '<p>Cargando campañas reales de Mailchimp y EmailOctopus…</p></div></div>';
+    return;
+  }
+
+  if (!historico || historico.error) {
+    const detalle = historico && historico.mensaje ? ' (' + esc(historico.mensaje) + ')' : '';
+    cont.innerHTML = '<div class="foco-mes"><div class="foco-texto"><h2>Métricas de mails</h2>' +
+      '<p>No se pudo conectar con <code>/api/metricas</code>' + detalle + '. Esto solo funciona abriendo el ' +
+      'dashboard publicado en Vercel — no en GitHub Pages ni con el archivo local.</p>' +
+      '<button class="btn btn-chico" id="btn-reintentar-metricas" style="margin-top:10px">Reintentar</button>' +
+      '</div></div>';
+    const btn = document.getElementById('btn-reintentar-metricas');
+    if (btn) btn.addEventListener('click', () => cargarHistorico(true));
+    return;
+  }
+
+  const todas = todasLasCampanas();
+  const errores = (historico.errores || []).length
+    ? '<div class="nota-item alerta">' + historico.errores.map(esc).join('<br>') + '</div>' : '';
+
+  if (!todas.length) {
+    cont.innerHTML = '<div class="foco-mes"><div class="foco-texto"><h2>Métricas de mails</h2>' +
+      '<p>Todavía no hay campañas enviadas desde enero de 2026.</p></div></div>' + errores;
+    return;
+  }
+
+  const totDest = todas.reduce((a, c) => a + (c.destinatarios || 0), 0);
+  const apProm = promedio(todas.map(c => c.tasaApertura));
+  const clProm = promedio(todas.map(c => c.tasaClics));
+  const generado = historico.generadoEn ? new Date(historico.generadoEn).toLocaleString('es-UY') : '—';
+
+  const grupos = Object.keys(SEGMENTOS).concat(['_sin'])
+    .map(k => ({ k, item: todas.filter(c => (c.segmento || '_sin') === k) }))
+    .filter(g => g.item.length);
+
+  const conTasa = todas.filter(c => c.tasaApertura !== null && c.tasaApertura !== undefined);
+  const mejores = conTasa.slice().sort((a, b) => b.tasaApertura - a.tasaApertura).slice(0, 5);
+  const peores = conTasa.length > 5
+    ? conTasa.slice().sort((a, b) => a.tasaApertura - b.tasaApertura).slice(0, 5)
+    : [];
+
+  cont.innerHTML =
+    '<div class="foco-mes">' +
+      '<div class="foco-texto">' +
+        '<h2>Métricas de mails</h2>' +
+        '<p>Todo lo mandado desde enero de 2026 por Mailchimp y EmailOctopus, en vivo. Se actualiza solo, ' +
+        'como máximo cada 5 horas.</p>' +
+      '</div>' +
+      '<div class="resumen-mes">' +
+        '<div class="resumen-item"><div class="resumen-num">' + todas.length + '</div><div class="resumen-lbl">Campañas</div></div>' +
+        '<div class="resumen-item"><div class="resumen-num">' + fmtNum(totDest) + '</div><div class="resumen-lbl">Destinatarios</div></div>' +
+        '<div class="resumen-item"><div class="resumen-num">' + fmtPct(apProm !== null ? apProm * 100 : null) + '</div><div class="resumen-lbl">Apertura prom.</div></div>' +
+        '<div class="resumen-item"><div class="resumen-num">' + fmtPct(clProm !== null ? clProm * 100 : null) + '</div><div class="resumen-lbl">CTR prom.</div></div>' +
+      '</div>' +
+    '</div>' +
+    errores +
+    '<section class="seccion">' +
+      '<div class="seccion-header"><h3>Por segmento</h3></div>' +
+      '<div class="lista-segmentos">' + grupos.map(filaSegmentoMetricas).join('') + '</div>' +
+    '</section>' +
+    (mejores.length
+      ? '<section class="seccion"><div class="seccion-header"><h3>🏆 Lo que mejor funcionó</h3></div>' +
+        '<div class="lista-campanas">' + mejores.map(filaRankingMetricas).join('') + '</div></section>'
+      : '') +
+    (peores.length
+      ? '<section class="seccion"><div class="seccion-header"><h3>⚠️ Lo que menos funcionó</h3></div>' +
+        '<div class="lista-campanas">' + peores.map(filaRankingMetricas).join('') + '</div></section>'
+      : '') +
+    '<p class="fc-generado">Última consulta: ' + esc(generado) +
+      ' · <button class="btn btn-chico" id="btn-reintentar-metricas">Actualizar</button></p>';
+
+  const btn = document.getElementById('btn-reintentar-metricas');
+  if (btn) btn.addEventListener('click', () => cargarHistorico(true));
+
+  anim(document.querySelectorAll('#contenido-metricas .foco-mes, #contenido-metricas .seccion'),
+    { opacity: [0, 1], transform: ['translateY(14px)', 'translateY(0)'] },
+    { duration: 0.45, delay: escalonar(0.05), ease: SALIDA });
+}
+
 /* ------------------------------------------------------------- VISTAS --- */
 
 function verVista(cual) {
   const vistas = {
     mes: document.getElementById('contenido'),
     calendario: document.getElementById('contenido-calendario'),
-    playbook: document.getElementById('contenido-playbook')
+    playbook: document.getElementById('contenido-playbook'),
+    metricas: document.getElementById('contenido-metricas')
   };
   if (!vistas[cual]) cual = 'mes';
 
   if (cual === 'calendario') renderCalendarioAnual();
   if (cual === 'playbook') renderPlaybook();
+  if (cual === 'metricas') {
+    if (!historico && !historicoCargando) cargarHistorico(false);
+    else renderMetricasHTML();
+  }
 
   Object.keys(vistas).forEach(k => { vistas[k].hidden = k !== cual; });
   /* la tira de meses y el selector son navegación del panel de mails:
