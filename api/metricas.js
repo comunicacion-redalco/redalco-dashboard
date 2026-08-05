@@ -54,6 +54,7 @@ async function traerMailchimp(apiKey) {
       rebotesBlandos: r.bounces?.soft_bounces ?? null,
       bajas: r.unsubscribed ?? null,
       ingresos: r.ecommerce?.total_revenue ?? null,
+      _debugRecipients: c.recipients ?? null,
     };
   }));
   return reportes.filter(Boolean);
@@ -103,6 +104,7 @@ async function traerEmailOctopus(apiKey) {
       // La API no trae conversión a socio ni plata recaudada: pendiente
       // definir el cruce con los links especiales por campaña.
       conversion: null,
+      _debugCampana: c,
     };
   }));
   return reportes.filter(Boolean);
