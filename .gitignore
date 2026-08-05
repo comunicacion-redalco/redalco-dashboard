@@ -1,0 +1,9 @@
+# Dependencias: se reinstalan con `npm install`.
+# motion.js es una copia propia dentro del repo, esa sí se versiona.
+node_modules/
+
+# Caché del hook de diseño, es local de cada máquina
+.impeccable/
+
+# macOS
+.DS_Store

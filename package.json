@@ -1,0 +1,16 @@
+{
+  "name": "redalco-dashboard",
+  "version": "1.0.0",
+  "description": "Panel interno de Redalco: plan de emails, calendario del sector y playbook por segmento",
+  "main": "_construir.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "motion": "^12.43.0"
+  }
+}

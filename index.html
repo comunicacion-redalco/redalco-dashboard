@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Redalco — Estrategia de mails</title>
+  <meta name="description" content="Panel interno de Redalco: los mails del plan anual, editables, con métricas de cada envío e informe mensual.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23138258'/><path d='M16 5l1.9 8.1L26 16l-8.1 1.9L16 26l-1.9-8.1L6 16l8.1-1.9z' fill='%23eac03b'/></svg>">
+  <link rel="stylesheet" href="assets.css">
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════ PORTADA ═══ -->
+  <section class="portada" id="portada">
+    <div class="portada-inner">
+      <div class="portada-logo" data-entra role="img" aria-label="Redalco"></div>
+      <p class="portada-eyebrow" data-entra>Panel interno de comunicaciones</p>
+      <h1 class="portada-titulo" data-entra>Estrategia<br><em>de mails</em></h1>
+      <p class="portada-sub" data-entra>
+        Los mails que le escribimos a socios, donantes, leads y ex socios
+        durante un año entero. Acá se editan, se copian y se mide qué pasó
+        con cada uno.
+      </p>
+
+      <div class="portada-cifras" data-entra>
+        <div class="portada-cifra"><b id="cifra-mails">35</b><span>Mails</span></div>
+        <div class="portada-cifra"><b>4</b><span>Segmentos</span></div>
+        <div class="portada-cifra"><b>12</b><span>Meses</span></div>
+      </div>
+
+      <button class="btn-entrar" id="btn-entrar" data-entra>Entrar al panel</button>
+    </div>
+    <p class="portada-pie">Agosto 2026 — Julio 2027</p>
+  </section>
+
+  <!-- ═════════════════════════════════════════════════════════ PANEL ═══ -->
+  <div class="panel" id="panel" hidden>
+
+    <header class="barra">
+      <div class="barra-inner">
+        <div class="barra-logo" role="img" aria-label="Redalco"></div>
+        <span class="barra-titulo">Estrategia de mails</span>
+        <nav class="vistas" aria-label="Secciones">
+          <button class="vista-btn activo" data-vista="mes">Mails</button>
+          <button class="vista-btn" data-vista="calendario">Calendario</button>
+          <button class="vista-btn" data-vista="playbook">Playbook</button>
+        </nav>
+        <span class="barra-sep"></span>
+        <button class="btn-portada" id="btn-portada">Volver a la portada</button>
+      </div>
+    </header>
+
+    <nav class="tira-anio" aria-label="Meses del plan"><div class="tira-inner" id="tira"></div></nav>
+
+    <div class="toolbar">
+      <div class="toolbar-inner">
+        <button class="nav-btn" id="btn-prev" title="Mes anterior" aria-label="Mes anterior">‹</button>
+        <div class="selector-mes">
+          <label for="mes-select">Mes</label>
+          <select id="mes-select"></select>
+        </div>
+        <button class="nav-btn" id="btn-next" title="Mes siguiente" aria-label="Mes siguiente">›</button>
+
+        <span class="toolbar-sep"></span>
+        <span class="guardado" id="guardado" role="status"></span>
+
+        <div class="grupo-btn">
+          <button class="btn btn-primario" id="btn-informe">Descargar informe del mes</button>
+          <button class="btn btn-chico" id="btn-md" title="El mismo informe en Markdown">.md</button>
+          <button class="btn btn-chico" id="btn-csv" title="Solo las métricas, para planilla">.csv</button>
+        </div>
+      </div>
+    </div>
+
+    <p class="aviso-protocolo" id="aviso-protocolo" hidden></p>
+
+    <main class="contenido" id="contenido"></main>
+    <main class="contenido" id="contenido-calendario" hidden></main>
+    <main class="contenido" id="contenido-playbook" hidden></main>
+
+    <footer class="footer">
+      <span>Todo se guarda en este navegador. Si limpiás el caché, se pierde: bajá el respaldo cada tanto.</span>
+      <span class="aviso-respaldo" id="aviso-respaldo"></span>
+      <div class="grupo-btn">
+        <button class="btn btn-chico" id="btn-csv-anual">Métricas del año (.csv)</button>
+        <button class="btn btn-chico" id="btn-exportar">Descargar respaldo</button>
+        <button class="btn btn-chico" id="btn-importar">Importar respaldo</button>
+        <input type="file" id="file-importar" accept="application/json,.json" hidden>
+      </div>
+    </footer>
+
+  </div>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <script src="motion.js"></script>
+  <script src="datos.js"></script>
+  <script src="calendario.js"></script>
+  <script src="playbook.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
