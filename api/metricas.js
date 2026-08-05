@@ -70,7 +70,7 @@ async function traerEmailOctopus(apiKey) {
     url.searchParams.set('limit', '100');
     if (siguiente) url.searchParams.set('starting_after', siguiente);
     const resp = await fetch(url, { headers: { Authorization: auth } });
-    if (!resp.ok) throw new Error(`EmailOctopus /campaigns: ${resp.status}`);
+    if (!resp.ok) throw new Error(`EmailOctopus /campaigns: ${resp.status} ${await resp.text()}`);
     const datos = await resp.json();
     const pagina = datos.data ?? datos;
     campanas.push(...pagina);
