@@ -1120,9 +1120,17 @@ function filaCampana(c) {
     ? (c.rebotesDuros || 0) + (c.rebotesBlandos || 0) : null);
   const tasaAp = c.tasaApertura != null ? ' · ' + fmtPct(c.tasaApertura * 100) : '';
   const tasaCl = c.tasaClics != null ? ' · ' + fmtPct(c.tasaClics * 100) : '';
+  const seg = c.segmento ? SEGMENTOS[c.segmento] : null;
+  const sinIdentificar = c.tagCrudo || c.listaNombre;
+  const etiquetaSeg = seg
+    ? '<span class="fc-seg fc-seg-' + seg.color + '">' + seg.icono + ' ' + esc(seg.nombre) + '</span>'
+    : sinIdentificar
+      ? '<span class="fc-seg fc-seg-desconocido">Sin identificar: ' + esc(sinIdentificar) + '</span>'
+      : '';
   return '<div class="fila-campana">' +
     '<div class="fc-asunto">' + esc(c.asunto) +
       '<span class="fc-fecha">' + esc(fmtFecha(c.fechaEnvio ? c.fechaEnvio.slice(0, 10) : null) || 'Sin fecha') + '</span>' +
+      etiquetaSeg +
     '</div>' +
     '<div class="fc-metricas">' +
       '<div class="fc-m"><b>' + fmtNum(c.aperturasUnicas) + '</b><span>Aperturas' + tasaAp + '</span></div>' +

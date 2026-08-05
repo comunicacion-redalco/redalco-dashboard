@@ -27,6 +27,24 @@ function cargarEnv() {
 // (cientos de reportes en serie) y no aporta nada que se vea.
 const DESDE = '2026-01-01T00:00:00+00:00';
 
+// Mailchimp no manda el segmento como campo aparte: hay que leerlo del texto
+// de "a quién se le mandó" (recipients.segment_text), que trae el tag usado.
+// Confirmado con el usuario el 2026-08-05 cuáles tags son cuáles.
+const MAPEO_TAGS_MAILCHIMP = {
+  'MISIÓN PLATOS 2026': 'mp',
+  'Misión Platos acumulado': 'mp',
+  'Donantes Mensuales': 'socios',
+  'Donantes Pausados': 'ex',
+  'Trivia': 'leads',
+};
+
+function segmentoDeMailchimp(recipients) {
+  const texto = recipients?.segment_text || '';
+  const m = texto.match(/tagged\s*<strong>([^<]+)<\/strong>/i);
+  const tag = m ? m[1].trim() : null;
+  return { tagCrudo: tag, segmento: tag ? (MAPEO_TAGS_MAILCHIMP[tag] || null) : null };
+}
+
 async function traerMailchimp(apiKey) {
   const prefijo = apiKey.split('-').pop();
   const base = `https://${prefijo}.api.mailchimp.com/3.0`;
@@ -52,6 +70,7 @@ async function traerMailchimp(apiKey) {
     const rResp = await fetch(`${base}/reports/${c.id}`, { headers: { Authorization: auth } });
     if (!rResp.ok) { console.warn(`  ! sin reporte para ${c.id}: ${rResp.status}`); return null; }
     const r = await rResp.json();
+    const { tagCrudo, segmento } = segmentoDeMailchimp(c.recipients);
     return {
       id: c.id,
       asunto: c.settings?.subject_line || c.settings?.title || '(sin asunto)',
@@ -66,9 +85,29 @@ async function traerMailchimp(apiKey) {
       bajas: r.unsubscribed ?? null,
       // Solo viene si hay integración de e-commerce conectada a Mailchimp; casi seguro null.
       ingresos: r.ecommerce?.total_revenue ?? null,
+      segmento,
+      tagCrudo,
     };
   }));
   return reportes.filter(Boolean);
+}
+
+async function traerListasEmailOctopus(base, auth) {
+  const nombres = {};
+  let siguiente = null;
+  while (true) {
+    const url = new URL(`${base}/lists`);
+    url.searchParams.set('limit', '100');
+    if (siguiente) url.searchParams.set('starting_after', siguiente);
+    const resp = await fetch(url, { headers: { Authorization: auth } });
+    if (!resp.ok) break;
+    const datos = await resp.json();
+    const pagina = datos.data ?? datos;
+    pagina.forEach(l => { nombres[l.id] = l.name; });
+    siguiente = datos.paging?.next?.starting_after;
+    if (!siguiente) break;
+  }
+  return nombres;
 }
 
 async function traerEmailOctopus(apiKey) {
@@ -97,6 +136,8 @@ async function traerEmailOctopus(apiKey) {
     return fecha && fecha >= DESDE;
   });
 
+  const nombresLista = recientes.length ? await traerListasEmailOctopus(base, auth) : {};
+
   const reportes = await Promise.all(recientes.map(async c => {
     const rResp = await fetch(`${base}/campaigns/${c.id}/reports/summary`, { headers: { Authorization: auth } });
     if (!rResp.ok) { console.warn(`  ! sin reporte para ${c.id}: ${rResp.status}`); return null; }
@@ -112,6 +153,8 @@ async function traerEmailOctopus(apiKey) {
       // La API de EmailOctopus no devuelve conversión a socio ni plata recaudada:
       // eso se cruza aparte con los links especiales de cada campaña.
       conversion: null,
+      listaNombre: (c.to || []).map(id => nombresLista[id]).filter(Boolean).join(', ') || null,
+      segmento: null,
     };
   }));
   return reportes.filter(Boolean);
