@@ -22,6 +22,11 @@ function cargarEnv() {
   }
 }
 
+// El dashboard solo muestra desde enero 2026 en adelante (ver MESES_PASADOS
+// en datos.js): pedir el historial completo campaña por campaña es lento
+// (cientos de reportes en serie) y no aporta nada que se vea.
+const DESDE = '2026-01-01T00:00:00+00:00';
+
 async function traerMailchimp(apiKey) {
   const prefijo = apiKey.split('-').pop();
   const base = `https://${prefijo}.api.mailchimp.com/3.0`;
@@ -32,7 +37,8 @@ async function traerMailchimp(apiKey) {
   const CANTIDAD = 1000;
   while (true) {
     const resp = await fetch(
-      `${base}/campaigns?count=${CANTIDAD}&offset=${offset}&status=sent&sort_field=send_time&sort_dir=DESC`,
+      `${base}/campaigns?count=${CANTIDAD}&offset=${offset}&status=sent&sort_field=send_time&sort_dir=DESC` +
+      `&since_send_time=${encodeURIComponent(DESDE)}`,
       { headers: { Authorization: auth } }
     );
     if (!resp.ok) throw new Error(`Mailchimp /campaigns: ${resp.status} ${await resp.text()}`);
@@ -42,12 +48,11 @@ async function traerMailchimp(apiKey) {
     offset += CANTIDAD;
   }
 
-  const resultado = [];
-  for (const c of campanas) {
+  const reportes = await Promise.all(campanas.map(async c => {
     const rResp = await fetch(`${base}/reports/${c.id}`, { headers: { Authorization: auth } });
-    if (!rResp.ok) { console.warn(`  ! sin reporte para ${c.id}: ${rResp.status}`); continue; }
+    if (!rResp.ok) { console.warn(`  ! sin reporte para ${c.id}: ${rResp.status}`); return null; }
     const r = await rResp.json();
-    resultado.push({
+    return {
       id: c.id,
       asunto: c.settings?.subject_line || c.settings?.title || '(sin asunto)',
       fechaEnvio: c.send_time || null,
@@ -61,9 +66,9 @@ async function traerMailchimp(apiKey) {
       bajas: r.unsubscribed ?? null,
       // Solo viene si hay integración de e-commerce conectada a Mailchimp; casi seguro null.
       ingresos: r.ecommerce?.total_revenue ?? null,
-    });
-  }
-  return resultado;
+    };
+  }));
+  return reportes.filter(Boolean);
 }
 
 async function traerEmailOctopus(apiKey) {
@@ -86,12 +91,16 @@ async function traerEmailOctopus(apiKey) {
     if (!siguiente) break;
   }
 
-  const resultado = [];
-  for (const c of campanas) {
+  const recientes = campanas.filter(c => {
+    const fecha = c.sent_at || c.status?.sent_at;
+    return fecha && fecha >= DESDE;
+  });
+
+  const reportes = await Promise.all(recientes.map(async c => {
     const rResp = await fetch(`${base}/campaigns/${c.id}/reports/summary`, { headers: { Authorization: auth } });
-    if (!rResp.ok) { console.warn(`  ! sin reporte para ${c.id}: ${rResp.status}`); continue; }
+    if (!rResp.ok) { console.warn(`  ! sin reporte para ${c.id}: ${rResp.status}`); return null; }
     const r = await rResp.json();
-    resultado.push({
+    return {
       id: c.id,
       asunto: c.name || '(sin nombre)',
       fechaEnvio: c.sent_at || c.status?.sent_at || null,
@@ -102,9 +111,9 @@ async function traerEmailOctopus(apiKey) {
       // La API de EmailOctopus no devuelve conversión a socio ni plata recaudada:
       // eso se cruza aparte con los links especiales de cada campaña.
       conversion: null,
-    });
-  }
-  return resultado;
+    };
+  }));
+  return reportes.filter(Boolean);
 }
 
 async function main() {
