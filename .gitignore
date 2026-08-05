@@ -7,3 +7,10 @@ node_modules/
 
 # macOS
 .DS_Store
+
+# Credenciales de sync/sync.mjs (Mailchimp, EmailOctopus) — nunca se commitea.
+.env
+
+# Salida de sync/sync.mjs: datos reales de campañas, no hace falta versionarlo.
+# Anclado a la raíz: api/metricas.js es código (la función de Vercel), no esto.
+/metricas.js

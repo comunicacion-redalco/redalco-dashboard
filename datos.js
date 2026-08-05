@@ -42,6 +42,19 @@ const BENCHMARKS = {
   roi: { label: 'ROI email marketing: $42 por cada $1' }
 };
 
+/* Meses reales, anteriores al plan (que arranca en agosto 2026). No tienen
+   mails planificados — el panel los muestra con las campañas reales de
+   Mailchimp/EmailOctopus de ese mes en vez de tarjetas para editar. */
+const MESES_PASADOS = [
+  { id: 'ene26', nombre: 'Enero 2026',   corto: 'Ene 26', pasado: true },
+  { id: 'feb26', nombre: 'Febrero 2026', corto: 'Feb 26', pasado: true },
+  { id: 'mar26', nombre: 'Marzo 2026',   corto: 'Mar 26', pasado: true },
+  { id: 'abr26', nombre: 'Abril 2026',   corto: 'Abr 26', pasado: true },
+  { id: 'may26', nombre: 'Mayo 2026',    corto: 'May 26', pasado: true },
+  { id: 'jun26', nombre: 'Junio 2026',   corto: 'Jun 26', pasado: true },
+  { id: 'jul26', nombre: 'Julio 2026',   corto: 'Jul 26', pasado: true }
+];
+
 const MESES = [
   /* ====================== AGOSTO 2026 ====================== */
   {

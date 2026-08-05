@@ -4,7 +4,8 @@
   "description": "Panel interno de Redalco: plan de emails, calendario del sector y playbook por segmento",
   "main": "_construir.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "sync": "node sync/sync.mjs"
   },
   "keywords": [],
   "author": "",

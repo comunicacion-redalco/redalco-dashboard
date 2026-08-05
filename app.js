@@ -17,8 +17,14 @@ const CAMPOS = [
   { k: 'rebotes',  l: 'Rebotes',        t: 'number', ph: 'Ej: 7' }
 ];
 
+/* Meses reales de antes del plan (enero–jul 2026) + los 12 del plan,
+   en un solo orden para la navegación (tira, selector, flechas). El
+   playbook, el calendario anual y el CSV anual siguen usando MESES solo:
+   son cálculos del plan, no de navegación. */
+const MESES_NAV = (typeof MESES_PASADOS !== 'undefined' ? MESES_PASADOS : []).concat(MESES);
+
 let estado = cargarEstado();
-let mesActual = estado.ultimoMes && MESES.some(m => m.id === estado.ultimoMes)
+let mesActual = estado.ultimoMes && MESES_NAV.some(m => m.id === estado.ultimoMes)
   ? estado.ultimoMes
   : MESES[0].id;
 
@@ -221,6 +227,7 @@ const claveCheck = (mesId, idTarea) => mesId + '::' + idTarea;
 /* ------------------------------------------------------------- RENDER --- */
 
 function estadoMes(mes) {
+  if (mes.pasado) return 'pasado';
   const conDatos = mes.emails.filter(e => {
     const m = estado.emails[e.id] && estado.emails[e.id].m;
     return m && (m.enviados || m.fecha);
@@ -230,7 +237,7 @@ function estadoMes(mes) {
 }
 
 function renderTiraAnio() {
-  document.getElementById('tira').innerHTML = MESES.map(m => {
+  document.getElementById('tira').innerHTML = MESES_NAV.map(m => {
     const est = estadoMes(m);
     return '<button class="chip-mes' + (m.id === mesActual ? ' activo' : '') + '" data-mes="' + m.id + '">' +
       '<i class="chip-punto ' + est + '"></i>' + esc(m.corto) + '</button>';
@@ -243,7 +250,11 @@ function renderTiraAnio() {
 
 function renderSelector() {
   const sel = document.getElementById('mes-select');
-  sel.innerHTML = MESES.map(m => '<option value="' + m.id + '">' + esc(m.nombre) + '</option>').join('');
+  const opt = m => '<option value="' + m.id + '">' + esc(m.nombre) + '</option>';
+  const pasados = MESES_NAV.filter(m => m.pasado);
+  sel.innerHTML =
+    (pasados.length ? '<optgroup label="Antes del plan">' + pasados.map(opt).join('') + '</optgroup>' : '') +
+    '<optgroup label="Plan de mails">' + MESES.map(opt).join('') + '</optgroup>';
   sel.value = mesActual;
   sel.addEventListener('change', () => irA(sel.value));
 }
@@ -317,7 +328,21 @@ function tarjetaEmail(email) {
 }
 
 function render() {
-  const mes = MESES.find(m => m.id === mesActual);
+  const mes = MESES_NAV.find(m => m.id === mesActual) || MESES[0];
+
+  document.getElementById('mes-select').value = mes.id;
+  document.getElementById('btn-prev').disabled = MESES_NAV[0].id === mes.id;
+  document.getElementById('btn-next').disabled = MESES_NAV[MESES_NAV.length - 1].id === mes.id;
+  document.querySelector('.toolbar .grupo-btn').hidden = !!mes.pasado;
+  renderTiraAnio();
+  avisoRespaldo();
+
+  if (mes.pasado) {
+    if (!historico && !historicoCargando) { cargarHistorico(false); return; }
+    renderMesPasado(mes);
+    return;
+  }
+
   const cont = document.getElementById('contenido');
 
   const tareas = tareasDe(mes);
@@ -376,12 +401,7 @@ function render() {
       '</div>' +
     '</section>';
 
-  document.getElementById('mes-select').value = mesActual;
-  document.getElementById('btn-prev').disabled = MESES[0].id === mesActual;
-  document.getElementById('btn-next').disabled = MESES[MESES.length - 1].id === mesActual;
   document.querySelectorAll('textarea.copy').forEach(autoAlto);
-  renderTiraAnio();
-  avisoRespaldo();
   conectarEventos();
   animarMes();
 }
@@ -1068,6 +1088,111 @@ function renderPlaybook() {
     '</section>';
 }
 
+/* -------------------------------------------------------------- HISTÓRICO */
+
+/* Meses reales (enero–julio 2026, antes de que arranque el plan): en vez de
+   tarjetas para editar, muestran las campañas reales de Mailchimp +
+   EmailOctopus de ese mes específico, traídas en vivo de /api/metricas.
+   Esa ruta solo existe si el sitio corre en Vercel (ver api/README.md) —
+   en GitHub Pages o abriendo el .html local, el fetch falla y se avisa por
+   qué en vez de romper la vista. */
+
+let historico = null;
+let historicoCargando = false;
+
+async function cargarHistorico(forzar) {
+  if (historico && !forzar) { render(); return; }
+  historicoCargando = true;
+  render();
+  try {
+    const resp = await fetch('/api/metricas', { cache: 'no-store' });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    historico = await resp.json();
+  } catch (e) {
+    historico = { error: true, mensaje: e.message };
+  }
+  historicoCargando = false;
+  render();
+}
+
+function filaCampana(c) {
+  const rebotes = c.rebotes != null ? c.rebotes : (c.rebotesDuros != null || c.rebotesBlandos != null
+    ? (c.rebotesDuros || 0) + (c.rebotesBlandos || 0) : null);
+  const tasaAp = c.tasaApertura != null ? ' · ' + fmtPct(c.tasaApertura * 100) : '';
+  const tasaCl = c.tasaClics != null ? ' · ' + fmtPct(c.tasaClics * 100) : '';
+  return '<div class="fila-campana">' +
+    '<div class="fc-asunto">' + esc(c.asunto) +
+      '<span class="fc-fecha">' + esc(fmtFecha(c.fechaEnvio ? c.fechaEnvio.slice(0, 10) : null) || 'Sin fecha') + '</span>' +
+    '</div>' +
+    '<div class="fc-metricas">' +
+      '<div class="fc-m"><b>' + fmtNum(c.aperturasUnicas) + '</b><span>Aperturas' + tasaAp + '</span></div>' +
+      '<div class="fc-m"><b>' + fmtNum(c.clicsUnicos) + '</b><span>Clics' + tasaCl + '</span></div>' +
+      '<div class="fc-m"><b>' + fmtNum(rebotes) + '</b><span>Rebotes</span></div>' +
+      '<div class="fc-m"><b>' + fmtNum(c.bajas) + '</b><span>Bajas</span></div>' +
+    '</div>' +
+  '</div>';
+}
+
+function renderMesPasado(mes) {
+  const cont = document.getElementById('contenido');
+
+  if (historicoCargando) {
+    cont.innerHTML = '<div class="foco-mes"><div class="foco-texto"><h2>' + esc(mes.nombre) + '</h2>' +
+      '<p>Cargando campañas reales de Mailchimp y EmailOctopus…</p></div></div>';
+    return;
+  }
+
+  if (!historico || historico.error) {
+    const detalle = historico && historico.mensaje ? ' (' + esc(historico.mensaje) + ')' : '';
+    cont.innerHTML = '<div class="foco-mes"><div class="foco-texto"><h2>' + esc(mes.nombre) + '</h2>' +
+      '<p>No se pudo conectar con <code>/api/metricas</code>' + detalle + '. Esto solo funciona abriendo el ' +
+      'dashboard publicado en Vercel — no en GitHub Pages ni con el archivo local.</p>' +
+      '<button class="btn btn-chico" id="btn-reintentar-pasado" style="margin-top:10px">Reintentar</button>' +
+      '</div></div>';
+    const btn = document.getElementById('btn-reintentar-pasado');
+    if (btn) btn.addEventListener('click', () => cargarHistorico(true));
+    return;
+  }
+
+  const { anio, mes: mesIdx } = anioMesDe(mes.id);
+  const clave = anio + '-' + String(mesIdx + 1).padStart(2, '0');
+  const filtra = c => c.fechaEnvio && c.fechaEnvio.slice(0, 7) === clave;
+  const mc = (historico.mailchimp || []).filter(filtra);
+  const eo = (historico.emailoctopus || []).filter(filtra);
+  const errores = (historico.errores || []).length
+    ? '<div class="nota-item alerta">' + historico.errores.map(esc).join('<br>') + '</div>' : '';
+
+  cont.innerHTML =
+    '<div class="foco-mes">' +
+      '<div class="foco-texto">' +
+        '<h2>' + esc(mes.nombre) + '</h2>' +
+        '<p>Mes anterior al plan: acá se ven las campañas que ya se mandaron de verdad, traídas en vivo ' +
+        'de Mailchimp y EmailOctopus. No hay mails para editar porque el plan todavía no había arrancado.</p>' +
+      '</div>' +
+      '<div class="resumen-mes">' +
+        '<div class="resumen-item"><div class="resumen-num">' + mc.length + '</div><div class="resumen-lbl">Mailchimp</div></div>' +
+        '<div class="resumen-item"><div class="resumen-num">' + eo.length + '</div><div class="resumen-lbl">EmailOctopus</div></div>' +
+      '</div>' +
+    '</div>' +
+    errores +
+    '<section class="seccion">' +
+      '<div class="seccion-header"><h3>Mailchimp</h3></div>' +
+      (mc.length
+        ? '<div class="lista-campanas">' + mc.map(filaCampana).join('') + '</div>'
+        : '<p class="cal-vacio">Sin campañas de Mailchimp en ' + esc(mes.nombre.toLowerCase()) + '.</p>') +
+    '</section>' +
+    '<section class="seccion">' +
+      '<div class="seccion-header"><h3>EmailOctopus</h3></div>' +
+      (eo.length
+        ? '<div class="lista-campanas">' + eo.map(filaCampana).join('') + '</div>'
+        : '<p class="cal-vacio">Todavía no hay campañas de EmailOctopus.</p>') +
+    '</section>';
+
+  anim(document.querySelectorAll('#contenido .foco-mes, #contenido .seccion'),
+    { opacity: [0, 1], transform: ['translateY(14px)', 'translateY(0)'] },
+    { duration: 0.45, delay: escalonar(0.05), ease: SALIDA });
+}
+
 /* ------------------------------------------------------------- VISTAS --- */
 
 function verVista(cual) {
@@ -1168,11 +1293,11 @@ function iniciar() {
     b.addEventListener('click', () => verVista(b.dataset.vista));
   });
 
-  const mesDe = () => MESES.find(m => m.id === mesActual);
-  const idx = () => MESES.findIndex(m => m.id === mesActual);
+  const mesDe = () => MESES_NAV.find(m => m.id === mesActual);
+  const idx = () => MESES_NAV.findIndex(m => m.id === mesActual);
 
-  document.getElementById('btn-prev').addEventListener('click', () => { if (idx() > 0) irA(MESES[idx() - 1].id); });
-  document.getElementById('btn-next').addEventListener('click', () => { if (idx() < MESES.length - 1) irA(MESES[idx() + 1].id); });
+  document.getElementById('btn-prev').addEventListener('click', () => { if (idx() > 0) irA(MESES_NAV[idx() - 1].id); });
+  document.getElementById('btn-next').addEventListener('click', () => { if (idx() < MESES_NAV.length - 1) irA(MESES_NAV[idx() + 1].id); });
 
   document.getElementById('btn-informe').addEventListener('click', () => {
     const mes = mesDe();
@@ -1203,8 +1328,8 @@ function iniciar() {
   document.addEventListener('keydown', e => {
     if (e.target.matches('input, textarea, select')) return;
     if (document.getElementById('panel').hidden) return;  // en la portada no aplica
-    if (e.key === 'ArrowLeft' && idx() > 0) irA(MESES[idx() - 1].id);
-    if (e.key === 'ArrowRight' && idx() < MESES.length - 1) irA(MESES[idx() + 1].id);
+    if (e.key === 'ArrowLeft' && idx() > 0) irA(MESES_NAV[idx() - 1].id);
+    if (e.key === 'ArrowRight' && idx() < MESES_NAV.length - 1) irA(MESES_NAV[idx() + 1].id);
   });
 }
 
