@@ -64,6 +64,8 @@ async function traerEmailOctopus(apiKey) {
   const auth = `Bearer ${apiKey}`;
 
   const campanas = [];
+  // El cursor de paginación viene en paging.next.starting_after — no es el
+  // id de la última campaña (eso rompía la página 2 con un 400).
   let siguiente = null;
   while (true) {
     const url = new URL(`${base}/campaigns`);
@@ -74,8 +76,7 @@ async function traerEmailOctopus(apiKey) {
     const datos = await resp.json();
     const pagina = datos.data ?? datos;
     campanas.push(...pagina);
-    if (!datos.paging?.next) break;
-    siguiente = pagina[pagina.length - 1]?.id;
+    siguiente = datos.paging?.next?.starting_after;
     if (!siguiente) break;
   }
 
