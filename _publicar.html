@@ -571,6 +571,42 @@ label.campo > span {
   color: var(--tinta-suave);
 }
 
+/* Campo que vino de una campaña asociada: mismo tamaño que un input, pero
+   de solo lectura — no se confunde con lo que todavía se carga a mano. */
+.campo-auto { display: flex; flex-direction: column; gap: 5px; }
+.campo-auto > span {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--tinta-suave);
+}
+.campo-auto > b {
+  font-family: var(--display);
+  font-size: 15px;
+  color: var(--verde-hondo);
+  font-variant-numeric: tabular-nums;
+  border: 1px solid var(--linea-suave);
+  border-radius: 8px;
+  padding: 8px 11px;
+  background: var(--papel-hueso);
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+}
+
+.select-chico {
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 10px;
+  border: 1px solid var(--linea);
+  border-radius: 999px;
+  background: var(--papel);
+  color: var(--tinta);
+  max-width: 280px;
+}
+
 input[type="text"], input[type="number"], input[type="date"], textarea {
   font-family: inherit;
   font-size: 14px;
@@ -2720,7 +2756,7 @@ let mesActual = estado.ultimoMes && MESES_NAV.some(m => m.id === estado.ultimoMe
 
 /* declaración de función y no const: cargarEstado() corre más arriba en el archivo */
 function vacio() {
-  return { emails: {}, checks: {}, notas: {}, ultimoMes: null, ultimoRespaldo: null };
+  return { emails: {}, checks: {}, notas: {}, ultimoMes: null, ultimoRespaldo: null, asociaciones: {} };
 }
 
 function cargarEstado() {
@@ -2733,7 +2769,8 @@ function cargarEstado() {
       checks: s.checks || {},
       notas: s.notas || {},
       ultimoMes: s.ultimoMes || null,
-      ultimoRespaldo: s.ultimoRespaldo || null
+      ultimoRespaldo: s.ultimoRespaldo || null,
+      asociaciones: s.asociaciones || {}
     };
   } catch (e) {
     console.warn('No se pudo leer el guardado previo:', e);
@@ -2863,11 +2900,18 @@ function autoAlto(el) {
 
 /* --------------------------------------------------------- CÁLCULOS ----- */
 
-/* Devuelve los indicadores derivados de las métricas cargadas a mano. */
+/* Devuelve los indicadores derivados de las métricas del envío: si el mail
+   está asociado a una campaña real, enviados/aperturas/clics/bajas vienen
+   de ahí (en vivo); conversión y $ generados siguen siendo a mano porque
+   ninguna de las dos APIs los tiene. */
 function calcular(email) {
   const m = datosEmail(email.id).m;
-  const env = num(m.enviados), ap = num(m.aperturas), cl = num(m.clics);
-  const cv = num(m.conv), ba = num(m.bajas), mo = num(m.monto);
+  const asociada = campanaAsociada(email);
+  const env = asociada ? (asociada.destinatarios ?? null) : num(m.enviados);
+  const ap = asociada ? (asociada.aperturasUnicas ?? null) : num(m.aperturas);
+  const cl = asociada ? (asociada.clicsUnicos ?? null) : num(m.clics);
+  const ba = asociada ? (asociada.bajas ?? null) : num(m.bajas);
+  const cv = num(m.conv), mo = num(m.monto);
 
   const or = pct(ap, env), ctr = pct(cl, env), ctor = pct(cl, ap);
   const conv = pct(cv, env), tbaja = pct(ba, env);
@@ -2947,17 +2991,52 @@ function renderSelector() {
   sel.addEventListener('change', () => irA(sel.value));
 }
 
+const CAMPOS_AUTO = { fecha: 1, enviados: 1, aperturas: 1, clics: 1, bajas: 1, rebotes: 1 };
+
+function valorAutoDe(asociada, clave) {
+  switch (clave) {
+    case 'fecha': return asociada.fechaEnvio ? asociada.fechaEnvio.slice(0, 10) : null;
+    case 'enviados': return asociada.destinatarios ?? null;
+    case 'aperturas': return asociada.aperturasUnicas ?? null;
+    case 'clics': return asociada.clicsUnicos ?? null;
+    case 'bajas': return asociada.bajas ?? null;
+    case 'rebotes': return rebotesDe(asociada);
+    default: return null;
+  }
+}
+
 function tarjetaEmail(email) {
   const seg = SEGMENTOS[email.seg];
   const d = datosEmail(email.id);
+  const asociada = campanaAsociada(email);
 
   const campos = CAMPOS.map(c => {
     const etiqueta = c.l || seg.conversion;
+    if (asociada && CAMPOS_AUTO[c.k]) {
+      const v = valorAutoDe(asociada, c.k);
+      const mostrado = c.k === 'fecha' ? (fmtFecha(v) || '—') : fmtNum(v);
+      return '<div class="campo-auto"><span>' + esc(etiqueta) + '</span><b>' + esc(mostrado) + '</b></div>';
+    }
     const v = d.m[c.k] === undefined ? '' : d.m[c.k];
     return '<label class="campo"><span>' + esc(etiqueta) + '</span>' +
       '<input type="' + c.t + '" data-metrica="' + c.k + '" value="' + esc(v) + '"' +
       (c.ph ? ' placeholder="' + esc(c.ph) + '"' : '') + (c.t === 'number' ? ' min="0" step="any"' : '') + '></label>';
   }).join('');
+
+  const candidatas = asociada ? [] : candidatasPara(email);
+  const asociacionHTML = asociada
+    ? '<span class="fc-seg fc-seg-' + seg.color + '">🔗 ' +
+        esc(fmtFecha(asociada.fechaEnvio ? asociada.fechaEnvio.slice(0, 10) : null) || 'sin fecha') +
+        ' · ' + esc(asociada.plataforma) + '</span>' +
+      '<button class="btn btn-chico" data-accion="desasociar">Desasociar</button>'
+    : candidatas.length
+      ? '<select class="select-chico" data-asociar>' +
+          '<option value="">Asociar campaña real…</option>' +
+          candidatas.map(c => '<option value="' + esc(claveCampana(c)) + '">' +
+            esc(fmtFecha(c.fechaEnvio ? c.fechaEnvio.slice(0, 10) : null) || 'Sin fecha') +
+            ' · ' + esc(c.plataforma) + ' · ' + fmtNum(c.destinatarios) + ' destinatarios</option>').join('') +
+        '</select>'
+      : '';
 
   const kpis = calcular(email).map(k =>
     '<div class="kpi"><div class="kpi-lbl">' + esc(k.lbl) + '</div>' +
@@ -3002,7 +3081,7 @@ function tarjetaEmail(email) {
       '</div>' +
 
       '<div class="bloque">' +
-        '<div class="bloque-header"><span class="bloque-titulo">Lo que dio el envío</span></div>' +
+        '<div class="bloque-header"><span class="bloque-titulo">Lo que dio el envío</span>' + asociacionHTML + '</div>' +
         '<div class="bloque-body">' +
           '<div class="grilla-metricas">' + campos + '</div>' +
           '<label class="campo"><span>Notas del envío (qué funcionó, qué no)</span>' +
@@ -3025,8 +3104,13 @@ function render() {
   renderTiraAnio();
   avisoRespaldo();
 
+  /* También hace falta en meses del plan: son las candidatas para asociar
+     un mail a la campaña real que lo mandó. Sin bloquear el render — las
+     tarjetas se ven igual mientras carga, la asociación aparece sola
+     cuando `historico` esté listo (cargarHistorico() vuelve a renderizar). */
+  if (!historico && !historicoCargando) cargarHistorico(false);
+
   if (mes.pasado) {
-    if (!historico && !historicoCargando) { cargarHistorico(false); return; }
     renderMesPasado(mes);
     return;
   }
@@ -3153,6 +3237,11 @@ function conectarEventos() {
           guardar(); render(); toast('Texto original restaurado');
           return;
         }
+        if (acc === 'desasociar') {
+          asociar(email, null);
+          toast('Campaña desasociada — volvés a cargar las métricas a mano');
+          return;
+        }
         const cuerpo = valor(email, 'copy');
         const texto = acc === 'copiar-todo'
           ? 'Asunto: ' + valor(email, 'asunto') + '\nPreview: ' + valor(email, 'preview') + '\n\n' + cuerpo
@@ -3160,6 +3249,15 @@ function conectarEventos() {
         copiar(texto, btn);
       });
     });
+
+    const selAsociar = tarjeta.querySelector('[data-asociar]');
+    if (selAsociar) {
+      selAsociar.addEventListener('change', () => {
+        if (!selAsociar.value) return;
+        asociar(email, selAsociar.value);
+        toast('Campaña asociada — las métricas se traen solas de acá en más');
+      });
+    }
   });
 
   document.querySelectorAll('[data-check]').forEach(cb => {
@@ -3812,9 +3910,13 @@ async function cargarHistorico(forzar) {
   redibujarVistasConHistorico();
 }
 
-function filaCampana(c) {
-  const rebotes = c.rebotes != null ? c.rebotes : (c.rebotesDuros != null || c.rebotesBlandos != null
+function rebotesDe(c) {
+  return c.rebotes != null ? c.rebotes : (c.rebotesDuros != null || c.rebotesBlandos != null
     ? (c.rebotesDuros || 0) + (c.rebotesBlandos || 0) : null);
+}
+
+function filaCampana(c) {
+  const rebotes = rebotesDe(c);
   const tasaAp = c.tasaApertura != null ? ' · ' + fmtPct(c.tasaApertura * 100) : '';
   const tasaCl = c.tasaClics != null ? ' · ' + fmtPct(c.tasaClics * 100) : '';
   const seg = c.segmento ? SEGMENTOS[c.segmento] : null;
@@ -3909,6 +4011,36 @@ function todasLasCampanas() {
   const mc = (historico.mailchimp || []).map(c => Object.assign({ plataforma: 'Mailchimp' }, c));
   const eo = (historico.emailoctopus || []).map(c => Object.assign({ plataforma: 'EmailOctopus' }, c));
   return mc.concat(eo);
+}
+
+/* --------------------------------------------------------- ASOCIACIÓN --- */
+
+/* Vincular un mail del plan con la campaña real que lo mandó: a partir de
+   ahí, aperturas/clics/bajas/rebotes/enviados se traen solos de la API en
+   vez de cargarse a mano. La elige el usuario (no se adivina por fecha):
+   puede haber más de un envío al mismo segmento en el mismo mes. */
+
+const claveCampana = c => c.plataforma + ':' + c.id;
+
+function campanaAsociada(email) {
+  const clave = estado.asociaciones[email.id];
+  if (!clave) return null;
+  return todasLasCampanas().find(c => claveCampana(c) === clave) || null;
+}
+
+/* Campañas del mismo segmento que todavía no están asociadas a NINGÚN mail
+   (ni a este ni a otro) — evita ofrecer dos veces la misma campaña. */
+function candidatasPara(email) {
+  const usadas = new Set(Object.values(estado.asociaciones));
+  return todasLasCampanas()
+    .filter(c => c.segmento === email.seg && !usadas.has(claveCampana(c)))
+    .sort((a, b) => (b.fechaEnvio || '').localeCompare(a.fechaEnvio || ''));
+}
+
+function asociar(email, clave) {
+  if (clave) estado.asociaciones[email.id] = clave; else delete estado.asociaciones[email.id];
+  guardar();
+  render();
 }
 
 function promedio(valores) {

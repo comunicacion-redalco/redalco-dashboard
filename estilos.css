@@ -548,6 +548,42 @@ label.campo > span {
   color: var(--tinta-suave);
 }
 
+/* Campo que vino de una campaña asociada: mismo tamaño que un input, pero
+   de solo lectura — no se confunde con lo que todavía se carga a mano. */
+.campo-auto { display: flex; flex-direction: column; gap: 5px; }
+.campo-auto > span {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--tinta-suave);
+}
+.campo-auto > b {
+  font-family: var(--display);
+  font-size: 15px;
+  color: var(--verde-hondo);
+  font-variant-numeric: tabular-nums;
+  border: 1px solid var(--linea-suave);
+  border-radius: 8px;
+  padding: 8px 11px;
+  background: var(--papel-hueso);
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+}
+
+.select-chico {
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 10px;
+  border: 1px solid var(--linea);
+  border-radius: 999px;
+  background: var(--papel);
+  color: var(--tinta);
+  max-width: 280px;
+}
+
 input[type="text"], input[type="number"], input[type="date"], textarea {
   font-family: inherit;
   font-size: 14px;
