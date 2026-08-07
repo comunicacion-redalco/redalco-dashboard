@@ -2756,7 +2756,7 @@ let mesActual = estado.ultimoMes && MESES_NAV.some(m => m.id === estado.ultimoMe
 
 /* declaración de función y no const: cargarEstado() corre más arriba en el archivo */
 function vacio() {
-  return { emails: {}, checks: {}, notas: {}, ultimoMes: null, ultimoRespaldo: null, asociaciones: {} };
+  return { emails: {}, checks: {}, notas: {}, ultimoMes: null, ultimoRespaldo: null, asociaciones: {}, segmentosManual: {} };
 }
 
 function cargarEstado() {
@@ -2770,7 +2770,8 @@ function cargarEstado() {
       notas: s.notas || {},
       ultimoMes: s.ultimoMes || null,
       ultimoRespaldo: s.ultimoRespaldo || null,
-      asociaciones: s.asociaciones || {}
+      asociaciones: s.asociaciones || {},
+      segmentosManual: s.segmentosManual || {}
     };
   } catch (e) {
     console.warn('No se pudo leer el guardado previo:', e);
@@ -3923,9 +3924,11 @@ function filaCampana(c) {
   const sinIdentificar = c.tagCrudo || c.listaNombre;
   const etiquetaSeg = seg
     ? '<span class="fc-seg fc-seg-' + seg.color + '">' + seg.icono + ' ' + esc(seg.nombre) + '</span>'
-    : sinIdentificar
-      ? '<span class="fc-seg fc-seg-desconocido">Sin identificar: ' + esc(sinIdentificar) + '</span>'
-      : '';
+    : '<select class="select-chico" data-marcar-segmento="' + esc(claveCampana(c)) + '">' +
+        '<option value="">' + (sinIdentificar ? '⚠️ ' + esc(sinIdentificar) : 'Marcar segmento…') + '</option>' +
+        Object.keys(SEGMENTOS).map(k =>
+          '<option value="' + k + '">' + SEGMENTOS[k].icono + ' ' + esc(SEGMENTOS[k].nombre) + '</option>').join('') +
+      '</select>';
   return '<div class="fila-campana">' +
     '<div class="fc-asunto">' +
       '<span class="fc-fecha">' + esc(fmtFecha(c.fechaEnvio ? c.fechaEnvio.slice(0, 10) : null) || 'Sin fecha') + '</span>' +
@@ -3995,6 +3998,16 @@ function renderMesPasado(mes) {
         : '<p class="cal-vacio">Todavía no hay campañas de EmailOctopus.</p>') +
     '</section>';
 
+  document.querySelectorAll('#contenido [data-marcar-segmento]').forEach(sel => {
+    sel.addEventListener('change', () => {
+      const clave = sel.dataset.marcarSegmento;
+      if (sel.value) estado.segmentosManual[clave] = sel.value; else delete estado.segmentosManual[clave];
+      guardar();
+      render();
+      toast(sel.value ? 'Segmento marcado' : 'Segmento sin marcar');
+    });
+  });
+
   anim(document.querySelectorAll('#contenido .foco-mes, #contenido .seccion'),
     { opacity: [0, 1], transform: ['translateY(14px)', 'translateY(0)'] },
     { duration: 0.45, delay: escalonar(0.05), ease: SALIDA });
@@ -4006,11 +4019,20 @@ function renderMesPasado(mes) {
    por segmento. Mismo fetch/caché de 5h que los meses pasados — comparten
    `historico`, así que si ya se cargó en otra vista no se vuelve a pedir. */
 
+/* EmailOctopus no expone tag/segmento por campaña en su API (a diferencia
+   de Mailchimp) — confirmado con datos reales el 2026-08-07. Para esos
+   casos (y para cualquier tag de Mailchimp que no esté en el mapeo) el
+   segmento se puede marcar a mano en el panel; esa marca pisa lo que haya
+   traído la API y de ahí se propaga sola a Métricas y a la asociación. */
 function todasLasCampanas() {
   if (!historico || historico.error) return [];
   const mc = (historico.mailchimp || []).map(c => Object.assign({ plataforma: 'Mailchimp' }, c));
   const eo = (historico.emailoctopus || []).map(c => Object.assign({ plataforma: 'EmailOctopus' }, c));
-  return mc.concat(eo);
+  return mc.concat(eo).map(c => {
+    const clave = c.plataforma + ':' + c.id;
+    const manual = estado.segmentosManual[clave];
+    return manual ? Object.assign({}, c, { segmento: manual }) : c;
+  });
 }
 
 /* --------------------------------------------------------- ASOCIACIÓN --- */
