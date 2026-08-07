@@ -141,8 +141,11 @@ const num = v => {
 };
 
 const pct = (a, b) => (a === null || b === null || b === 0) ? null : (a / b) * 100;
-const fmtPct = v => v === null ? '—' : v.toFixed(v < 10 ? 2 : 1).replace('.', ',') + '%';
-const fmtNum = v => v === null ? '—' : v.toLocaleString('es-UY');
+/* == y no === : varios campos de EmailOctopus vienen undefined en vez de
+   null (no todos los campos que tiene Mailchimp existen en esa API) — con
+   === null esos casos rompían con un TypeError en vez de mostrar "—". */
+const fmtPct = v => v == null ? '—' : v.toFixed(v < 10 ? 2 : 1).replace('.', ',') + '%';
+const fmtNum = v => v == null ? '—' : v.toLocaleString('es-UY');
 
 function fmtFecha(f) {
   if (!f) return null;
