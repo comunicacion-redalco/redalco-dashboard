@@ -1137,7 +1137,7 @@ function filaCampana(c) {
       ? '<span class="fc-seg fc-seg-desconocido">Sin identificar: ' + esc(sinIdentificar) + '</span>'
       : '';
   return '<div class="fila-campana">' +
-    '<div class="fc-asunto">' + esc(c.asunto) +
+    '<div class="fc-asunto">' +
       '<span class="fc-fecha">' + esc(fmtFecha(c.fechaEnvio ? c.fechaEnvio.slice(0, 10) : null) || 'Sin fecha') + '</span>' +
       etiquetaSeg +
     '</div>' +
@@ -1252,7 +1252,7 @@ function filaRankingMetricas(c) {
       ? '<span class="fc-seg fc-seg-desconocido">Sin identificar: ' + esc(sinIdentificar) + '</span>'
       : '';
   return '<div class="fila-campana">' +
-    '<div class="fc-asunto">' + esc(c.asunto) +
+    '<div class="fc-asunto">' +
       '<span class="fc-fecha">' + esc(fmtFecha(c.fechaEnvio ? c.fechaEnvio.slice(0, 10) : null) || '') +
         ' · ' + esc(c.plataforma) + '</span>' +
       etiquetaSeg +
