@@ -3966,9 +3966,10 @@ function renderMesPasado(mes) {
 
   const { anio, mes: mesIdx } = anioMesDe(mes.id);
   const clave = anio + '-' + String(mesIdx + 1).padStart(2, '0');
-  const filtra = c => c.fechaEnvio && c.fechaEnvio.slice(0, 7) === clave;
-  const mc = (historico.mailchimp || []).filter(filtra);
-  const eo = (historico.emailoctopus || []).filter(filtra);
+  const deEsteMes = c => c.fechaEnvio && c.fechaEnvio.slice(0, 7) === clave;
+  const todas = todasLasCampanas().filter(deEsteMes);
+  const mc = todas.filter(c => c.plataforma === 'Mailchimp');
+  const eo = todas.filter(c => c.plataforma === 'EmailOctopus');
   const errores = (historico.errores || []).length
     ? '<div class="nota-item alerta">' + historico.errores.map(esc).join('<br>') + '</div>' : '';
 
