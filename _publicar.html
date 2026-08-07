@@ -3932,10 +3932,18 @@ function filaSegmentoMetricas(g) {
 }
 
 function filaRankingMetricas(c) {
+  const seg = c.segmento ? SEGMENTOS[c.segmento] : null;
+  const sinIdentificar = c.tagCrudo || c.listaNombre;
+  const etiquetaSeg = seg
+    ? '<span class="fc-seg fc-seg-' + seg.color + '">' + seg.icono + ' ' + esc(seg.nombre) + '</span>'
+    : sinIdentificar
+      ? '<span class="fc-seg fc-seg-desconocido">Sin identificar: ' + esc(sinIdentificar) + '</span>'
+      : '';
   return '<div class="fila-campana">' +
     '<div class="fc-asunto">' + esc(c.asunto) +
       '<span class="fc-fecha">' + esc(fmtFecha(c.fechaEnvio ? c.fechaEnvio.slice(0, 10) : null) || '') +
         ' · ' + esc(c.plataforma) + '</span>' +
+      etiquetaSeg +
     '</div>' +
     '<div class="fc-metricas">' +
       '<div class="fc-m"><b>' + fmtPct(c.tasaApertura * 100) + '</b><span>Apertura</span></div>' +
