@@ -5,6 +5,26 @@
 
 const CLAVE = 'redalco-dashboard-v1';
 
+/* Estado de envío de cada mail: lo marca la usuaria a mano (no se infiere de
+   la asociación con una campaña real — son cosas distintas: uno es "voy a
+   mandar esto", el otro es "esto es lo que mandé"). Un clic pasa al
+   siguiente estado, en este orden. */
+const ESTADOS_ENVIO = [
+  { k: 'pendiente', l: 'Pendiente', icono: '⚪' },
+  { k: 'programado', l: 'Programado', icono: '🔵' },
+  { k: 'enviado', l: 'Enviado', icono: '🟢' }
+];
+
+function estadoEnvioDe(email) {
+  const k = datosEmail(email.id).estadoEnvio || 'pendiente';
+  return ESTADOS_ENVIO.find(e => e.k === k) || ESTADOS_ENVIO[0];
+}
+
+function siguienteEstadoEnvio(k) {
+  const i = ESTADOS_ENVIO.findIndex(e => e.k === k);
+  return ESTADOS_ENVIO[(i + 1) % ESTADOS_ENVIO.length].k;
+}
+
 /* Campos de métricas que se cargan a mano después de cada envío. */
 const CAMPOS = [
   { k: 'fecha',    l: 'Fecha de envío', t: 'date' },
@@ -324,6 +344,8 @@ function tarjetaEmail(email) {
     '<div class="kpi-nota ' + k.clase + '">' + esc(k.nota) + '</div></div>'
   ).join('');
 
+  const estadoEnv = estadoEnvioDe(email);
+
   return '' +
   '<article class="tarjeta seg-' + seg.color + (fueEditado(email) ? ' editado' : '') + '" data-email="' + email.id + '">' +
     '<header class="tarjeta-header">' +
@@ -332,6 +354,8 @@ function tarjetaEmail(email) {
         '<div class="seg-nombre">' + esc(seg.nombre) + '</div>' +
         '<div class="seg-titulo">' + esc(email.titulo) + '</div>' +
       '</div>' +
+      '<button class="badge-estado estado-' + estadoEnv.k + '" data-accion="ciclar-estado" ' +
+        'title="Click para cambiar de estado">' + estadoEnv.icono + ' ' + esc(estadoEnv.l) + '</button>' +
       (email.destacado ? '<span class="badge badge-alerta">' + esc(email.destacado) + '</span>' : '') +
       (email.derivado ? '<span class="badge">Derivado — adaptar</span>' : '') +
     '</header>' +
@@ -520,6 +544,12 @@ function conectarEventos() {
         if (acc === 'desasociar') {
           asociar(email, null);
           toast('Campaña desasociada — volvés a cargar las métricas a mano');
+          return;
+        }
+        if (acc === 'ciclar-estado') {
+          d.estadoEnvio = siguienteEstadoEnvio(estadoEnvioDe(email).k);
+          guardar(); render();
+          toast(ESTADOS_ENVIO.find(e => e.k === d.estadoEnvio).l);
           return;
         }
         const cuerpo = valor(email, 'copy');
@@ -1570,6 +1600,13 @@ function iniciar() {
   render();
   avisoProtocolo();
   animarPortada();
+
+  /* Mientras la pestaña quede abierta, vuelve a pedir /api/metricas cada 10
+     minutos (no espera a que alguien la cierre y reabra). El Cache-Control
+     de la función sigue sirviendo la misma respuesta cacheada de Vercel
+     hasta que pasen 5 horas desde el último fetch real — este intervalo no
+     lo salta, solo evita depender de un reload manual para verlo. */
+  setInterval(() => cargarHistorico(true), 10 * 60 * 1000);
 
   document.getElementById('btn-entrar').addEventListener('click', entrarAlPanel);
   document.getElementById('btn-portada').addEventListener('click', volverAPortada);

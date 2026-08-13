@@ -491,6 +491,28 @@ select#mes-select {
 }
 .badge-alerta { background: #fff; color: var(--rosa); }
 
+/* Fondo blanco sólido y no translúcido a propósito: así se lee igual sobre
+   cualquier color de header (incluido el dorado, donde el texto claro
+   pierde contraste) sin necesitar una excepción por segmento. */
+.badge-estado {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  background: #fff;
+  transition: filter .12s ease;
+}
+.badge-estado:hover { filter: brightness(.96); }
+.badge-estado.estado-pendiente  { color: var(--tinta-suave); }
+.badge-estado.estado-programado { color: var(--dorado-hondo); }
+.badge-estado.estado-enviado    { color: var(--verde-hondo); }
+
 .tarjeta-body { padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 16px; }
 
 .meta-fila { display: grid; grid-template-columns: 74px 1fr; gap: 5px 12px; font-size: 13.5px; margin: 0; }
