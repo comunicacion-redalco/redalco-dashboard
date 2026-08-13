@@ -457,9 +457,10 @@ select#mes-select {
   gap: 11px;
   flex-wrap: wrap;
 }
-.seg-verde  .tarjeta-header { background: linear-gradient(100deg, var(--verde-hondo), var(--verde)); }
-.seg-azul   .tarjeta-header { background: linear-gradient(100deg, #1f4f6b, #2f7695); }
-.seg-rojo   .tarjeta-header { background: linear-gradient(100deg, #8c2340, var(--rosa)); }
+.seg-verde   .tarjeta-header { background: linear-gradient(100deg, var(--verde-hondo), var(--verde)); }
+.seg-azul    .tarjeta-header { background: linear-gradient(100deg, #1f4f6b, #2f7695); }
+.seg-rojo    .tarjeta-header { background: linear-gradient(100deg, #8c2340, var(--rosa)); }
+.seg-naranja .tarjeta-header { background: linear-gradient(100deg, var(--naranja-hondo), var(--naranja)); }
 
 /* sobre el dorado el texto va oscuro: en blanco el contraste no llega */
 .seg-dorado .tarjeta-header {
@@ -970,10 +971,11 @@ textarea.notas { min-height: 62px; resize: vertical; font-size: 13.5px; }
   border-radius: 999px;
   margin-top: 5px;
 }
-.fc-seg-verde  { background: color-mix(in srgb, var(--verde) 14%, white); color: var(--verde-hondo); }
-.fc-seg-dorado { background: color-mix(in srgb, var(--dorado) 24%, white); color: var(--dorado-hondo); }
-.fc-seg-azul   { background: color-mix(in srgb, #2f7695 16%, white); color: #1f4f6b; }
-.fc-seg-rojo   { background: color-mix(in srgb, var(--rosa) 14%, white); color: #8c2340; }
+.fc-seg-verde   { background: color-mix(in srgb, var(--verde) 14%, white); color: var(--verde-hondo); }
+.fc-seg-dorado  { background: color-mix(in srgb, var(--dorado) 24%, white); color: var(--dorado-hondo); }
+.fc-seg-azul    { background: color-mix(in srgb, #2f7695 16%, white); color: #1f4f6b; }
+.fc-seg-rojo    { background: color-mix(in srgb, var(--rosa) 14%, white); color: #8c2340; }
+.fc-seg-naranja { background: color-mix(in srgb, var(--naranja) 16%, white); color: var(--naranja-hondo); }
 .fc-seg-desconocido { background: var(--linea-suave); color: var(--tinta-suave); font-weight: 600; }
 .fc-metricas { display: flex; gap: 22px; flex-wrap: wrap; }
 .fc-m { text-align: center; min-width: 64px; }
