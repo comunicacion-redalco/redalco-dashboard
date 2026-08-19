@@ -480,9 +480,10 @@ select#mes-select {
   gap: 11px;
   flex-wrap: wrap;
 }
-.seg-verde  .tarjeta-header { background: linear-gradient(100deg, var(--verde-hondo), var(--verde)); }
-.seg-azul   .tarjeta-header { background: linear-gradient(100deg, #1f4f6b, #2f7695); }
-.seg-rojo   .tarjeta-header { background: linear-gradient(100deg, #8c2340, var(--rosa)); }
+.seg-verde   .tarjeta-header { background: linear-gradient(100deg, var(--verde-hondo), var(--verde)); }
+.seg-azul    .tarjeta-header { background: linear-gradient(100deg, #1f4f6b, #2f7695); }
+.seg-rojo    .tarjeta-header { background: linear-gradient(100deg, #8c2340, var(--rosa)); }
+.seg-naranja .tarjeta-header { background: linear-gradient(100deg, var(--naranja-hondo), var(--naranja)); }
 
 /* sobre el dorado el texto va oscuro: en blanco el contraste no llega */
 .seg-dorado .tarjeta-header {
@@ -993,10 +994,11 @@ textarea.notas { min-height: 62px; resize: vertical; font-size: 13.5px; }
   border-radius: 999px;
   margin-top: 5px;
 }
-.fc-seg-verde  { background: color-mix(in srgb, var(--verde) 14%, white); color: var(--verde-hondo); }
-.fc-seg-dorado { background: color-mix(in srgb, var(--dorado) 24%, white); color: var(--dorado-hondo); }
-.fc-seg-azul   { background: color-mix(in srgb, #2f7695 16%, white); color: #1f4f6b; }
-.fc-seg-rojo   { background: color-mix(in srgb, var(--rosa) 14%, white); color: #8c2340; }
+.fc-seg-verde   { background: color-mix(in srgb, var(--verde) 14%, white); color: var(--verde-hondo); }
+.fc-seg-dorado  { background: color-mix(in srgb, var(--dorado) 24%, white); color: var(--dorado-hondo); }
+.fc-seg-azul    { background: color-mix(in srgb, #2f7695 16%, white); color: #1f4f6b; }
+.fc-seg-rojo    { background: color-mix(in srgb, var(--rosa) 14%, white); color: #8c2340; }
+.fc-seg-naranja { background: color-mix(in srgb, var(--naranja) 16%, white); color: var(--naranja-hondo); }
 .fc-seg-desconocido { background: var(--linea-suave); color: var(--tinta-suave); font-weight: 600; }
 .fc-metricas { display: flex; gap: 22px; flex-wrap: wrap; }
 .fc-m { text-align: center; min-width: 64px; }
@@ -1398,9 +1400,12 @@ textarea.notas { min-height: 62px; resize: vertical; font-size: 13.5px; }
 <script>
 /* ============================================================================
    REDALCO — Plan de emails Agosto 2026 / Julio 2027
-   Fuente del copy: 1_REDALCO_TODOS_LOS_MAILS.md (transcripción literal).
-   Foco, objetivo, checklist y notas: derivados del contexto del plan
-   (el archivo original solo trae asunto, preview y cuerpo).
+   Ago 2026–Ene 2027 reescrito sobre la comunicación real de Redalco (Notion:
+   Comunicación 2026, Misión Platos, Ser Socio de Redalco; bases reales
+   importadas a EmailOctopus jul–ago 2026) — no sobre 1_REDALCO_TODOS_LOS_MAILS.md,
+   que no reflejaba la voz real (usaba "hambre", encuadraba la donación como
+   cerrada en el mes). Feb 2027 en adelante sigue siendo el borrador anterior,
+   pendiente de revisión.
    ========================================================================== */
 
 const SEGMENTOS = {
@@ -1412,11 +1417,18 @@ const SEGMENTOS = {
     nota: 'Nunca se les pide plata: se les agradece, se les muestra y se les pide amplificar o referir.'
   },
   mp: {
-    nombre: 'Donantes Misión Platos',
+    nombre: 'Misión Platos 2026',
     icono: '🟡',
     color: 'dorado',
     conversion: 'Conversiones a socio mensual',
-    nota: 'Cohorte que donó una sola vez en junio. El primer pedido directo recién va en octubre (mes 3).'
+    nota: 'Donaron una sola vez en junio 2026. El pedido de socio ya se mandó el 13/8 — de acá en más, mostrar impacto y reforzar sin repetirlo hasta diciembre.'
+  },
+  hist: {
+    nombre: 'MP 2021–2025 + Ocasionales',
+    icono: '🟠',
+    color: 'naranja',
+    conversion: 'Conversiones a socio mensual',
+    nota: 'Bases fusionadas: Misión Platos histórica (2021–2025) y Donantes Ocasionales son gente que donó una sola vez y nunca se activó — mismo objetivo, mismo mensaje. Primer pedido directo recién en octubre (mes 3).'
   },
   leads: {
     nombre: 'Leads de ferias y eventos',
@@ -1426,11 +1438,11 @@ const SEGMENTOS = {
     nota: 'Objetivo: convertir a socio mensual o, en su defecto, donación puntual. Preferir mensual.'
   },
   ex: {
-    nombre: 'Ex socios / pausados / bajas',
+    nombre: 'Pausados / Baja / Tarjeta con problemas',
     icono: '🔴',
     color: 'rojo',
     conversion: 'Reactivaciones',
-    nota: 'Solo 4 mails en TODO el año, muy espaciados. Sin presión, sin reclamo.'
+    nota: 'Mostrar impacto, nunca solo "te extrañamos". La tarjeta con problemas es un flujo aparte, automático y operativo — no emocional. 3 mails espaciados en el período + el automático.'
   }
 };
 
@@ -1459,49 +1471,65 @@ const MESES = [
     id: 'ago26',
     nombre: 'Agosto 2026',
     corto: 'Ago 26',
-    foco: 'Arranque del plan. Se activan los 4 segmentos por primera vez. Nadie recibe un pedido de plata.',
+    foco: 'Arranque de la estrategia real: 5 segmentos, sobre la voz real de Redalco. El pedido de socio a MP 2026 ya salió el 13/8, por fuera de este calendario.',
     emails: [
       {
         id: 'ago26-socios',
         seg: 'socios',
         titulo: 'Mail #1 — Pertenencia',
-        foco: 'Día del Niño + sensibilizar, sin pedir nada',
+        foco: 'Día del Niño + impacto colectivo, sin pedir nada',
         objetivo: 'Retención y sentido de pertenencia. Meta: 30%+ de apertura.',
-        asunto: 'Lo que rescatamos alimenta socios cada mes',
-        preview: 'Historias de chicos que comen gracias a vos, todos los meses.',
+        asunto: 'Hoy es Día del Niño. Esto es lo que hacés posible cada mes',
+        preview: 'Gracias a socios como vos, esto no depende de un solo mes.',
         copy: `Hola [Nombre],
 
-Tu aporte cada mes alimenta chicos como Camila, que ahora hace la tarea con la panza llena. Como Tomás, que juega en la ronda con energía. Como [Nombre], que cocina con frutas frescas por primera vez en meses.
+Hoy es Día del Niño en Uruguay. Y hoy, como todos los meses, la red que sostenés con tu aporte sigue funcionando: frutas y verduras que llegan a CAIF, clubes de niños, centros juveniles y merenderos de todo el país.
 
-No es una sola vez. Es todos los meses.
+Sos parte de un grupo de 460 personas que decidieron que esto no dependa de una sola vez. Cada mes, sin pausa.
 
-Por eso tu aporte importa 12 veces al año, no una.
+No hace falta que hagas nada hoy. Solo queríamos que lo supieras: lo que armaste con tu aporte sigue en pie.
 
-Gracias por estar del lado correcto.
+Gracias por estar.
 
-[CTA: Fotos en Instagram →]`
+[CTA: Ver el trabajo del mes en Instagram →]`
       },
       {
         id: 'ago26-mp',
         seg: 'mp',
-        titulo: 'Mail #1 — Mes 2 de la cohorte',
-        foco: 'Día del Niño: mostrar a quién llegó el aporte de junio',
-        objetivo: 'Cerrar el círculo del aporte de junio. NO pedir plata todavía. Meta: 28%+ de apertura.',
-        asunto: 'Día del Niño: los chicos que comen gracias a tu aporte de junio',
-        preview: 'Historias de 4 chicos para los que tu aporte de junio cambió agosto.',
+        titulo: 'Mail #1 — Refuerzo de impacto (post-pedido del 13/8)',
+        foco: 'El pedido de socio ya salió el 13/8. Este mail no lo repite: muestra en qué se usó el aporte de junio.',
+        objetivo: 'Sostener el vínculo sin insistir con el pedido. Meta: 28%+ de apertura.',
+        asunto: 'Así se usó lo que donaste en Misión Platos',
+        preview: 'Dos meses después, tu aporte de junio sigue en movimiento.',
         copy: `Hola [Nombre],
 
-Hace dos meses donaste en Misión Platos. Hoy 16 de agosto es Día del Niño. Te presentamos a quiénes llega tu aporte.
+En junio fuiste parte de Misión Platos. Con $250 garantizaste 50 platos ese fin de semana, porque las empresas duplicaron cada donación.
 
-**Camila** hace la tarea sin hambre en la cabeza en [Org A]. **Mateo** come variado cada semana en [Org B]. **Sofía y Bruno** toman zumo fresco todos los viernes en [Org C].
+Ese aporte no se gastó de una vez. Entró a una red que todavía hoy —agosto— sigue rescatando frutas y verduras, clasificándolas y llevándolas a organizaciones de todo el país.
 
-No son números. Son cuatro de los miles de chicos para los que tu aporte de junio fue la diferencia.
+$10 rescatan 500 gramos de frutas y verduras: lo que la OMS recomienda comer por día. A eso le decimos un plato Redalco.
 
-¿Querés que esto pase todos los meses, no solo junio?
+Gracias por haber sido parte. Sigue viva.
 
-[CTA: Quiero ser socio mensual →]
+[CTA: Conocé cómo trabajamos →]`
+      },
+      {
+        id: 'ago26-hist',
+        seg: 'hist',
+        titulo: 'Mail 1 de 6 — Reconexión',
+        foco: 'Primer contacto con la base fusionada MP 2021–2025 + Ocasionales. No pedir nada.',
+        objetivo: 'Reabrir el vínculo mostrando en qué se convirtió Redalco. Meta: 22%+ de apertura.',
+        asunto: 'Lo que empezó cuando donaste, todavía sigue',
+        preview: 'Un repaso de en qué se convirtió Redalco desde tu aporte.',
+        copy: `Hola [Nombre],
 
-Gracias por pensarlo.`
+En algún momento fuiste parte de Redalco con una donación. Puede que haya sido en Misión Platos, puede que haya sido en otro momento. De cualquier forma, fuiste parte.
+
+Hoy Redalco es una red de más de 400 organizaciones y 460 socios mensuales que sostienen el rescate de frutas y verduras en todo Uruguay, mes a mes.
+
+Quisimos contarte en qué se convirtió eso que empezaste.
+
+[CTA: Ver el mapa de organizaciones →]`
       },
       {
         id: 'ago26-leads',
@@ -1526,35 +1554,52 @@ No es un detalle. Es una brecha. Nosotros la cerramos hace 10 años.
       {
         id: 'ago26-ex',
         seg: 'ex',
-        titulo: 'Mail #1 de 4 — Reencuentro',
-        foco: 'Contar que Redalco creció. Nada de reclamo.',
-        objetivo: 'Reabrir la conversación. Meta: 20%+ de apertura, sin picos de bajas.',
-        asunto: 'Te extrañamos — pasaron cosas en Redalco',
-        preview: 'No es reclamo. Es: crezcamos juntos de nuevo.',
+        titulo: 'Mail 1 de 3 — Impacto, sin pedir nada',
+        foco: 'No es "te extrañamos": es un dato de lo que la red sigue haciendo.',
+        objetivo: 'Reabrir el canal sin generar culpa. Meta: 20%+ de apertura, sin picos de bajas.',
+        asunto: 'Esto es lo que la red sigue haciendo',
+        preview: 'No te escribimos para pedirte nada. Solo para contarte esto.',
         copy: `Hola [Nombre],
 
-Fuiste socio/a con nosotros. Se pausó en algún momento. No te escribimos a reclamar, sino a contarte que crecimos.
+Sabemos que en algún momento pausaste o diste de baja tu aporte. No te escribimos para pedirte que vuelvas.
 
-Hoy llegamos a **400+ organizaciones**. Hace exactamente **10 años** que empezó todo. Cada semana rescatamos más.
+Te escribimos para contarte que la red que ayudaste a construir sigue funcionando: este mes, gracias a socios activos, se rescataron [X] kilos de frutas y verduras que llegaron a organizaciones de todo el país.
 
-¿Vale la pena intentar de nuevo, aunque sea con otro monto?
+Si alguna vez querés volver a ser parte, la puerta sigue abierta. Mientras tanto, gracias por lo que ya construiste.
 
-[CTA: Quiero volver →]
+[CTA: Ver en qué estamos trabajando →]`
+      },
+      {
+        id: 'ago26-ex-tarjeta',
+        seg: 'ex',
+        automatizado: true,
+        titulo: 'Automático — Tarjeta con problemas',
+        foco: 'Se dispara cuando falla un cobro, no en una fecha fija del calendario. Tono operativo, no emocional.',
+        objetivo: 'Recuperar el cobro sin fricción. Meta: 30%+ actualiza el medio de pago.',
+        asunto: 'Hubo un problema con tu último cobro',
+        preview: 'Nada grave — solo hay que actualizar un dato.',
+        copy: `Hola [Nombre],
 
-No es el momento? Está bien. Nos alegra que hayas estado.`
+Notamos que tu último aporte mensual no se pudo procesar. Puede ser algo simple: la tarjeta venció, cambió el límite, o hubo un error de la operadora.
+
+Si querés, podés actualizar el medio de pago en menos de un minuto y tu aporte sigue como si nada hubiera pasado.
+
+Gracias por seguir siendo parte.
+
+[CTA: Actualizar medio de pago →]`
       }
     ],
     checklistExtra: [
-      'Etiquetar la cohorte MP 2026 en EmailOctopus',
-      'Crear y validar las 4 listas de segmentos',
+      'Confirmar con Silvia (donaciones@redalco.org) si "MP 2021-2025" y "Donantes Ocasionales" ya están en una sola lista de EmailOctopus o hay que fusionarlas a mano',
+      'Etiquetar la cohorte MP 2026 que ya recibió el pedido de socio el 13/8, para no reenviarlo',
       'Validar plantilla visual (logo, pie, link de baja)',
-      'Programar el envío antes del viernes 14 (el 16 es domingo y hay mucho ruido comercial)'
+      'Programar el envío antes del viernes 14 (el 16 es domingo)'
     ],
     notas: [
-      'Mes 2 para la cohorte de Misión Platos: todavía NO se pide plata. El primer pedido directo va en octubre.',
-      'Es el único mes donde salen los 4 segmentos juntos: revisar que nadie esté en dos listas a la vez.',
-      'La fecha del Día del Niño quedó confirmada: en 2026 es el domingo 16 de agosto, tal como dice el copy.',
-      'El copy trae placeholders reales sin completar ([Nombre], [Org A/B/C], [Evento]). No enviar sin reemplazarlos.'
+      'El pedido de socio a MP 2026 ya se mandó el 13/8, por fuera de este calendario — no repetirlo en este mail.',
+      'Primer mes del segmento Histórico (MP 2021-2025 + Ocasionales): todavía no se pide nada, recién en octubre.',
+      'El mail de tarjeta con problemas es automático (se dispara por evento), no de calendario — puede caer cualquier mes.',
+      'La fecha del Día del Niño 2026 está confirmada: domingo 16 de agosto.'
     ]
   },
 
@@ -1563,51 +1608,63 @@ No es el momento? Está bien. Nos alegra que hayas estado.`
     id: 'sep26',
     nombre: 'Septiembre 2026',
     corto: 'Set 26',
-    foco: 'Mes del voluntariado: invitar a ver el rescate con los propios ojos. Sin ex socios este mes.',
+    foco: 'Día Internacional de Concientización sobre la Pérdida y el Desperdicio de Alimentos (29/9, ONU) — hueco real del calendario anterior, ahora cubierto. Sin Pausados/Baja este mes.',
     emails: [
       {
         id: 'sep26-socios',
         seg: 'socios',
-        titulo: 'Mail #2 — Voluntariado',
-        foco: 'Invitación a la UAM, jueves de 15 a 18',
-        objetivo: 'Profundizar el vínculo: pasar de donante a participante. Meta: 5+ socios anotados.',
-        asunto: 'Voluntariado en la UAM: tocá dónde llega tu aporte',
-        preview: 'Todos los jueves, 15 a 18hs. Un jueves. Sin compromiso.',
+        titulo: 'Mail #2 — Comunidad',
+        foco: 'Mención breve del 29/9, sin pedir nada',
+        objetivo: 'Mantener el vínculo con contenido de valor. Meta: 28%+ de apertura.',
+        asunto: 'El 29 de septiembre es nuestro día, todo el año',
+        preview: 'Por qué un día de la ONU nos importa 365 días.',
         copy: `Hola [Nombre],
 
-Sos socio/a desde hace [X tiempo]. Tu aporte llega a organizaciones. ¿Querés verlo con tus ojos?
+El 29 de septiembre la ONU dedica un día a la pérdida y el desperdicio de alimentos. Nosotros lo trabajamos los 365.
 
-**Todos los jueves, 15 a 18hs, en la UAM rescatamos frutas.** Vos clasificás, lavás, embalás.
+Este mes, gracias a socios como vos, la red rescató frutas y verduras que iban a tirarse y llegaron a organizaciones de todo el país.
 
-No es invisible. Es real.
+No hace falta que hagas nada. Solo queríamos que lo supieras.
 
-Varios socios ya vienen. Dicen que leer "[X] platos" no es lo mismo que verlo pasar entre las manos.
+Gracias por sostenerlo.
 
-¿Te animás? Un jueves. Sin compromiso.
-
-[CTA: Quiero ir →]`
+[CTA: Ver el trabajo del mes en Instagram →]`
       },
       {
         id: 'sep26-mp',
         seg: 'mp',
-        titulo: 'Mail #2 — Mes 3 de la cohorte',
-        foco: 'Día del Estudiante (21/9): quiénes rescatan',
-        objetivo: 'Humanizar el equipo y abrir la puerta al voluntariado. Sigue sin pedir plata.',
-        asunto: 'Lucas, Camila, Bruno: 3 estudiantes que rescatan cada jueves',
-        preview: 'Conocé a quiénes trabajan con nosotros.',
+        titulo: 'Mail #2 — 29 de septiembre',
+        foco: 'Día Internacional contra el desperdicio: por qué les importa a ellos también',
+        objetivo: 'Sostener el vínculo con un dato relevante. Meta: 26%+ de apertura.',
+        asunto: 'El 29 de septiembre es, literalmente, nuestro tema',
+        preview: 'Por qué este día le importa a alguien que ya donó una vez.',
         copy: `Hola [Nombre],
 
-Hoy es Día del Estudiante. Te presentamos a 3 pibes que rescatan con nosotros.
+El 29 de septiembre, la ONU dedica un día entero a algo que en Redalco trabajamos los 365: la pérdida y el desperdicio de alimentos.
 
-**Lucas (16):** "Hacer algo útil de verdad."
+En Uruguay se desperdician 125 millones de kilos de frutas y verduras por año — no por estar en mal estado, sino por su forma, tamaño o exceso de producción.
 
-**Camila (14):** Su mamá cocina en una organización. Vino porque quería que lleguen más rescates.
+Vos ya hiciste algo con eso en junio. Hoy, esa misma red sigue rescatando, clasificando y entregando, todos los días del año, no solo cuatro.
 
-**Bruno (19):** Hace 8 meses que va cada jueves. "Algo que importa."
+[CTA: Así se ve un día de rescate →]`
+      },
+      {
+        id: 'sep26-hist',
+        seg: 'hist',
+        titulo: 'Mail 2 de 6 — Historia de impacto',
+        foco: 'Mes 2 de la secuencia. Aún sin pedir nada.',
+        objetivo: 'Profundizar la reconexión con un dato concreto. Meta: 22%+ de apertura.',
+        asunto: 'A dónde llega una fruta que no se tira',
+        preview: 'El recorrido completo, desde que se rescata hasta que llega a un plato.',
+        copy: `Hola [Nombre],
 
-Tu aporte de junio abrió la puerta. Adentro hay más.
+Una fruta que iba a tirarse por su forma o su tamaño entra a la red de Redalco, se clasifica y llega a una organización en menos de 48 horas.
 
-[CTA: Voluntariado en la UAM →]`
+Eso pasa todas las semanas, en todo Uruguay, con o sin campaña puntual de por medio.
+
+Vos fuiste parte de esto en algún momento. Quisimos que supieras cómo sigue funcionando.
+
+[CTA: Ver el mapa de organizaciones →]`
       },
       {
         id: 'sep26-leads',
@@ -1632,15 +1689,15 @@ Para ella es libertad. Para los chicos que comen, es que alguien se importa.
       }
     ],
     checklistExtra: [
+      'Confirmar que el segmento Histórico tiene trazabilidad real (~48h) del rescate antes de prometerlo en el copy',
       'Coordinar con el equipo de la UAM la capacidad de voluntarios por jueves',
-      'Armar el formulario / link de anotación al voluntariado',
       'Conseguir la historia real de la cocinera (nombre + organización + foto)',
       'Corregir el typo del CTA de Leads: "sumarlme" → "sumarme"'
     ],
     notas: [
-      'Este mes NO va mail a ex socios. El siguiente para ellos es noviembre.',
-      'Es el primer pedido de plata del año, y solo a Leads. Socios y MP siguen sin pedido.',
-      'Día del Estudiante en Uruguay: 21 de septiembre.'
+      'Este mes no va mail a Pausados/Baja (cadencia espaciada) ni pedido al Histórico — recién en octubre.',
+      'Es el primer pedido de plata del período, y solo a Leads. Socios, MP 2026 e Histórico siguen sin pedido.',
+      'Día Internacional de Concientización sobre la Pérdida y el Desperdicio de Alimentos: 29 de septiembre (ONU).'
     ]
   },
 
@@ -1649,56 +1706,78 @@ Para ella es libertad. Para los chicos que comen, es que alguien se importa.
     id: 'oct26',
     nombre: 'Octubre 2026',
     corto: 'Oct 26',
-    foco: 'Día Mundial de la Alimentación (16/10) y EL PRIMER PEDIDO DIRECTO a la cohorte de Misión Platos.',
+    foco: 'Día Mundial de la Alimentación (16/10) y EL PRIMER PEDIDO DIRECTO al segmento Histórico (MP 2021-2025 + Ocasionales).',
     emails: [
       {
         id: 'oct26-socios',
         seg: 'socios',
         titulo: 'Mail #3 — Los números',
-        foco: 'Día Mundial de la Alimentación: la ecuación completa',
-        objetivo: 'Justificar el aporte con datos duros. Meta: 30%+ de apertura.',
-        asunto: '125 millones de kilos se tiran al año — por eso existes',
-        preview: 'Cifras del desperdicio que justifican tu aporte 12 meses.',
+        foco: 'Día Mundial de la Alimentación: la ecuación completa, sin pedir nada',
+        objetivo: 'Reforzar el sentido del aporte con datos reales. Meta: 30%+ de apertura.',
+        asunto: 'Hoy es el Día Mundial de la Alimentación',
+        preview: 'Los números detrás de tu aporte mensual.',
         copy: `Hola [Nombre],
 
-Hoy 16 de octubre es Día Mundial de la Alimentación.
+Hoy 16 de octubre es el Día Mundial de la Alimentación.
 
-**Cifras sin filtro:**
-- 125 millones de kilos: frutas/verduras descartadas cada año en Uruguay
-- 250.000 personas: sin comida garantizada todos los días
-- Vos, con tu aporte cada mes: frenas eso 12 veces al año
+En Uruguay se desperdician 125 millones de kilos de frutas y verduras por año. Con $10 rescatamos 500 gramos — lo que la OMS recomienda comer por día. Eso es un plato Redalco.
 
-No es un número. Es la ecuación que frena el desperdicio.
+Tu aporte hace ese cálculo posible, mes a mes, no una vez al año.
 
 Gracias por ser parte.
 
-[CTA: Fotos en Instagram →]`
+[CTA: Ver el trabajo del mes en Instagram →]`
       },
       {
         id: 'oct26-mp',
         seg: 'mp',
-        destacado: 'PRIMER PEDIDO DIRECTO del año a esta cohorte',
-        titulo: 'Mail #3 — EL PEDIDO',
-        foco: 'Mes 4: pasar de donación única a mensual',
-        objetivo: 'LA métrica del año para este segmento. Meta: 3–5% de conversión a mensual.',
-        asunto: 'PRIMER PEDIDO: ¿Y si tu aporte fuera todos los meses?',
-        preview: '3 meses después. Ya viste que funciona. ¿Lo probamos mensual?',
+        titulo: 'Mail #3 — Impacto + comunidad',
+        foco: 'Impacto continuo + mención suave de los socios mensuales, sin insistir',
+        objetivo: 'Sostener el vínculo y sembrar la idea de socio sin repetir el pedido. Meta: 26%+ de apertura.',
+        asunto: 'Hoy es el Día Mundial de la Alimentación — así seguimos',
+        preview: 'Tu aporte de junio y el trabajo de todos los días.',
         copy: `Hola [Nombre],
 
-Hace 3 meses donaste en Misión Platos. Tu aporte se convirtió en [X] platos.
+Hoy es el Día Mundial de la Alimentación. En Redalco lo vivimos como cualquier otro día: rescatando, clasificando, entregando.
 
-Desde junio hasta hoy, seguimos rescatando cada semana sin parar. Sin campaña en la tele. Sin matching corporativo.
+Tu aporte de junio sigue siendo parte de esa red. Y hay 460 personas que decidieron que ese trabajo no dependa de una sola vez al año, sino de todos los meses.
 
-¿Tu aporte de una sola vez? Valioso.
-¿Si fuera todos los meses? Diferencia total.
+[CTA: Conocé cómo trabajamos →]`
+      },
+      {
+        id: 'oct26-hist',
+        seg: 'hist',
+        destacado: 'PRIMER PEDIDO DIRECTO del período a este segmento',
+        titulo: 'Mail 3 de 6 — Primer pedido directo',
+        foco: 'Mes 3 de la secuencia: pasar de donación única a socio mensual',
+        objetivo: 'La métrica clave de este segmento. Meta: 2–3% de conversión a mensual.',
+        asunto: '¿Y si tu próximo aporte no fuera el último?',
+        preview: '460 personas ya decidieron que esto sea todos los meses.',
+        copy: `Hola [Nombre],
 
-¿Probamos hacerlo mensual?
+Hace un tiempo elegiste donar en Redalco. Esta vez te proponemos algo distinto: que no sea una vez más, sino todos los meses.
 
-No es para toda la vida. Dos meses. Si no te gusta, lo cancelas.
+Con $10 rescatamos 500 gramos de frutas y verduras — un plato Redalco. Como socio mensual, ese plato se repite, mes a mes, sin que tengas que volver a pensarlo.
 
-[CTA: Quiero ser socio mensual →]
+Hoy somos 460. La meta es 1.000 antes de que termine el año.
 
-Gracias por pensarlo.`
+[CTA: Quiero ser socio mensual →]`
+      },
+      {
+        id: 'oct26-ex',
+        seg: 'ex',
+        titulo: 'Mail 2 de 3 — Invitación suave',
+        foco: 'Día Mundial de la Alimentación: puerta abierta, sin presión',
+        objetivo: 'Reabrir la puerta sin generar culpa. Meta: 1%+ de reactivación.',
+        asunto: 'Hoy es el Día Mundial de la Alimentación',
+        preview: 'Si alguna vez quisiste volver, hoy es un buen día.',
+        copy: `Hola [Nombre],
+
+Hoy es el Día Mundial de la Alimentación. En Redalco lo vivimos rescatando frutas y verduras que, de otra forma, se hubieran tirado.
+
+No sabemos por qué pausaste tu aporte, y está bien. Si en algún momento la situación cambió y querés volver a ser parte, es tan simple como un click.
+
+[CTA: Quiero retomar mi aporte →]`
       },
       {
         id: 'oct26-leads',
@@ -1726,15 +1805,15 @@ No en la teoría. En platos reales. Para gente real.
       }
     ],
     checklistExtra: [
-      'Calcular el [X] de platos real por donante MP (monto ÷ ratio $250 = 25 platos)',
+      'Calcular el dato real de kilos/platos del mes para reemplazar en el copy antes de enviar',
       'Sacar fotos nuevas de platos servidos esta semana (3 organizaciones distintas)',
-      'Preparar la landing de socio mensual para el pico de tráfico',
-      'Segmentar: excluir del mail de Leads a los que ya se hicieron socios'
+      'Preparar la landing de socio mensual para el pico de tráfico del segmento Histórico',
+      'Segmentar: excluir del mail de Leads a quienes ya se hicieron socios'
     ],
     notas: [
-      '⚠️ ES EL MES CLAVE DEL AÑO PARA MISIÓN PLATOS. Todo lo anterior fue construcción de confianza para este pedido.',
-      'Si la conversión de MP baja del 2%, revisar antes de repetir el pedido en noviembre.',
-      'El copy de MP usa "lo cancelas" (tuteo). Redalco habla de vos: revisar si va "lo cancelás".'
+      'Mes clave para el segmento Histórico: todo agosto y septiembre fue construir confianza para este pedido.',
+      'MP 2026 NO recibe un segundo pedido este mes — el próximo es en diciembre.',
+      'Si la conversión del Histórico baja de 2%, revisar el ángulo antes de repetir en noviembre.'
     ]
   },
 
@@ -1743,52 +1822,61 @@ No en la teoría. En platos reales. Para gente real.
     id: 'nov26',
     nombre: 'Noviembre 2026',
     corto: 'Nov 26',
-    foco: 'Mes de Teletón y prueba social. Vuelve el segmento de ex socios (mail 2 de 4).',
+    foco: 'Previa de GivingTuesday y prueba social para quienes todavía no convirtieron. Sin Pausados/Baja este mes.',
     emails: [
       {
         id: 'nov26-socios',
         seg: 'socios',
-        titulo: 'Mail #4 — Contraste con Teletón',
-        foco: 'Mientras otros recaudaban, acá se rescataba igual',
-        objetivo: 'Diferenciación y orgullo de pertenencia. Meta: 30%+ de apertura.',
-        asunto: 'Teletón: mientras otros recaudaban, nosotros rescatábamos igual',
-        preview: '400+ organizaciones pidieron más comida esta semana.',
+        titulo: 'Mail #4 — Previa de GivingTuesday',
+        foco: 'Impacto + adelanto de GivingTuesday, sin pedir nada a socios',
+        objetivo: 'Mantener el vínculo antes del pico de diciembre. Meta: 28%+ de apertura.',
+        asunto: 'Se viene GivingTuesday — y vos ya estás adentro',
+        preview: 'Mientras el resto se suma por un día, vos ya sostenés todo el año.',
         copy: `Hola [Nombre],
 
-Teletón terminó. Fue solidario. Fue necesario.
+El 1 de diciembre es GivingTuesday, el día en que mucha gente dona por primera vez.
 
-Mientras, en la UAM rescatábamos igual. Y las 400+ organizaciones pidieron más: durante la Teletón atienden más gente, así piden más rescate.
+Vos ya lo hacés todos los meses. Este mes, gracias a socios como vos, la red volvió a sostenerse sin pausa.
 
-Tu aporte mensual hizo eso posible. Noviembre fue [X] platos extra.
+Gracias por estar antes de que sea tendencia.
 
-Gracias por estar.
-
-[CTA: Fotos en Instagram →]`
+[CTA: Ver el trabajo del mes en Instagram →]`
       },
       {
         id: 'nov26-mp',
         seg: 'mp',
-        titulo: 'Mail #4 — Segundo pedido',
-        foco: 'Mes 5: balance de junio a noviembre',
-        objetivo: 'Reintentar la conversión con números acumulados. Meta: 2–3% de conversión.',
-        asunto: '5 meses después: ¿viste todo lo que tu aporte generó?',
-        preview: 'Números reales desde junio a noviembre.',
+        titulo: 'Mail #4 — Prueba social',
+        foco: 'Impacto + cuántos ya son socios, antes del segundo pedido de diciembre',
+        objetivo: 'Sembrar la conversión de diciembre con prueba social. Meta: 26%+ de apertura.',
+        asunto: '460 personas ya decidieron que sea todos los meses',
+        preview: 'Tu aporte de junio, y lo que decidieron otros después.',
         copy: `Hola [Nombre],
 
-Hace 5 meses donaste en Misión Platos: $[monto] = [X] platos.
+Desde junio, tu aporte sigue siendo parte de la red que rescata frutas y verduras en todo Uruguay.
 
-Estos 5 meses:
-- [X] platos totales
-- 400+ organizaciones alcanzadas
-- 52 semanas sin parar
-- Pibes con zumo fresco por primera vez
-- Mamás que pudieron cocinar diferente
+Mientras tanto, otros que empezaron como vos —con una sola donación— decidieron sumarse como socios mensuales. Hoy son 460.
 
-Todo desde un aporte de una sola vez.
+En diciembre te vamos a volver a preguntar. Mientras tanto, gracias por seguir siendo parte.
 
-¿Querés que sea todos los meses?
+[CTA: Conocé cómo trabajamos →]`
+      },
+      {
+        id: 'nov26-hist',
+        seg: 'hist',
+        titulo: 'Mail 4 de 6 — Otro ángulo',
+        foco: 'Para quienes no convirtieron en octubre: otra historia, sin insistir con el mismo pedido',
+        objetivo: 'Segunda oportunidad de conversión con un ángulo distinto. Meta: 1–2% de conversión.',
+        asunto: 'Una red de más de 400 organizaciones',
+        preview: 'Cómo se conecta lo que donaste con el resto de Redalco.',
+        copy: `Hola [Nombre],
 
-[CTA: Ser socio mensual →]`
+Cuando donaste, tu aporte se sumó a una red de más de 400 organizaciones: CAIF, clubes de niños, centros juveniles, merenderos.
+
+Esa red no funciona por una donación aislada. Funciona porque cada mes hay gente que decide sostenerla.
+
+Si todavía lo estás pensando, no hay apuro. La puerta sigue abierta.
+
+[CTA: Quiero ser socio mensual →]`
       },
       {
         id: 'nov26-leads',
@@ -1807,37 +1895,18 @@ Dicen lo mismo: "Al principio curiosidad. Pero seguir viendo cada semana qué pa
 ¿Vos? $250/mes. Dos meses. Si no te late, lo cancelas.
 
 [CTA: Quiero intentar →]`
-      },
-      {
-        id: 'nov26-ex',
-        seg: 'ex',
-        titulo: 'Mail #2 de 4 — Los 10 años',
-        foco: 'Qué cambió en Redalco desde que se fueron',
-        objetivo: 'Reactivación con salida honrosa. Meta: 1%+ de reactivación.',
-        asunto: '10 años: esto cambió desde que te fuiste',
-        preview: 'Redalco creció. ¿Vale replantearse?',
-        copy: `Hola [Nombre],
-
-10 años exactos. Hace [X] que te fuiste.
-
-**352 mil toneladas rescatadas.** 400+ organizaciones. Premios, alianzas, reportes públicos.
-
-¿Vale replantearse?
-
-[CTA: Quiero volver →]
-[CTA: Está bien, gracias igual →]`
       }
     ],
     checklistExtra: [
-      'Verificar la cifra de "352 mil toneladas" contra la Memoria 2025 antes de enviar',
-      'Confirmar la fecha de Teletón 2026 para no enviar el mail antes de que termine',
-      'Conseguir 1 testimonio real de socio nuevo para el mail de Leads',
-      'Medir el [X] de platos extra de noviembre'
+      'Confirmar la fecha exacta del envío de GivingTuesday (1/12) para la previa de socios',
+      'Conseguir 1 testimonio real de socio nuevo para reforzar la prueba social',
+      'Preparar el segundo pedido de MP 2026 e Histórico para diciembre',
+      'Medir cuántos del Histórico convirtieron en octubre antes de escribir el mail de noviembre'
     ],
     notas: [
-      'Segundo de los 4 mails del año a ex socios. El próximo recién en marzo.',
-      'El mail de ex socios tiene DOS CTA: hay que poder medir cuántos eligen "está bien, gracias igual" (es un dato, no un fracaso).',
-      '⚠️ "352 mil toneladas" no coincide con los datos cargados en el proyecto de videos (9.000.000 kg = 9.000 t). Verificar la cifra antes de publicarla.'
+      'Este mes no va mail a Pausados/Baja (cadencia espaciada) — el siguiente es en diciembre.',
+      'MP 2026 todavía no recibe el segundo pedido: es en diciembre. Este mail es puente, no ask.',
+      'El segmento Histórico usa un ángulo distinto al de octubre para no sonar repetitivo con quien no convirtió.'
     ]
   },
 
@@ -1846,49 +1915,77 @@ Dicen lo mismo: "Al principio curiosidad. Pero seguir viendo cada semana qué pa
     id: 'dic26',
     nombre: 'Diciembre 2026',
     corto: 'Dic 26',
-    foco: 'Cierre de año: balance para todos y limpieza de lista para Leads.',
+    foco: 'Balance del año y segundo (y último) pedido directo para MP 2026 e Histórico. Tercer y último mail del período a Pausados/Baja.',
     emails: [
       {
         id: 'dic26-socios',
         seg: 'socios',
-        titulo: 'Mail #5 — Balance + referidos',
-        foco: 'Balance 2026 personalizado y pedido de referidos',
-        objetivo: 'Cerrar el año con orgullo y activar referidos. Meta: 20+ referidos.',
-        asunto: 'Balance 2026: esto generaste vos',
-        preview: '[X] platos + [Y] kilos + 12 meses sin parar.',
+        titulo: 'Mail #5 — Balance del año',
+        foco: 'Balance 2026 + gracias. El único CTA es referir, no donar.',
+        objetivo: 'Cerrar el año con orgullo de pertenencia. Meta: 20+ referidos.',
+        asunto: 'Balance 2026: esto hicimos juntos',
+        preview: 'Un año de aportes, mes a mes, sin pausa.',
         copy: `Hola [Nombre],
 
-Hace [X meses] sos socio:
-- [TOTAL] platos
-- [X] organizaciones
-- Historias reales de pibes que comieron mejor
+Este año, socios como vos sostuvieron la red de Redalco mes a mes: frutas y verduras rescatadas, clasificadas y entregadas a organizaciones de todo Uruguay, sin depender de una campaña puntual.
 
-No es "gracias genérico". Es: vos lo hiciste.
+Eso lo hiciste vos, doce veces este año.
 
-¿Referís a alguien? Gana sorteo.
+Si conocés a alguien que quiera sumarse, esta es una buena semana para invitarlo.
 
-[CTA: Quiero referir →]`
+[CTA: Invitar a alguien →]`
       },
       {
         id: 'dic26-mp',
         seg: 'mp',
-        titulo: 'Mail #5 — Balance de la cohorte',
-        foco: 'Mes 6: balance completo del aporte de junio',
-        objetivo: 'Última conversión del año calendario. Meta: 2%+ de conversión.',
-        asunto: '6 meses después: balance completo de tu aporte',
-        preview: 'Desde junio a diciembre — números finales.',
+        titulo: 'Mail #4 — Balance + segundo pedido',
+        foco: 'Balance de 6 meses + segundo pedido directo de socio',
+        objetivo: 'Última conversión del período para este segmento. Meta: 2%+ de conversión.',
+        asunto: 'Seis meses después: así siguió tu aporte de junio',
+        preview: 'El balance completo, y una propuesta para 2027.',
         copy: `Hola [Nombre],
 
-$[monto] en junio = [X] platos.
+En junio donaste en Misión Platos. Seis meses después, ese aporte sigue siendo parte de una red que no paró: rescates cada semana, en todo Uruguay, sin campaña de por medio.
 
-Desde junio a diciembre, sin campaña, sin tele:
-- [X] platos totales
-- 400+ organizaciones cada semana
-- Historias de pibes y mamás
+Te lo preguntamos una vez más antes de que termine el año: ¿lo hacemos mensual en 2027?
 
-¿Probamos mensual en 2027?
+$10 rescatan 500 gramos de frutas y verduras — un plato Redalco. Como socio, ese plato se repite solo, mes a mes.
 
-[CTA: Ser socio mensual →]`
+[CTA: Quiero ser socio mensual →]`
+      },
+      {
+        id: 'dic26-hist',
+        seg: 'hist',
+        titulo: 'Mail 5 de 6 — Balance + segundo pedido',
+        foco: 'Balance del año + invitación a empezar 2027 siendo socio',
+        objetivo: 'Segundo y último pedido directo del período. Meta: 2%+ de conversión.',
+        asunto: '¿Empezamos 2027 con vos adentro?',
+        preview: 'La red sigue creciendo. La pregunta sigue en pie.',
+        copy: `Hola [Nombre],
+
+Este año la red de Redalco llegó a más de 400 organizaciones y 460 socios mensuales.
+
+Vos fuiste parte con tu aporte. Te proponemos una última vez antes de que termine el año: que 2027 empiece con vos ya adentro, no como una donación más.
+
+[CTA: Quiero ser socio mensual →]`
+      },
+      {
+        id: 'dic26-ex',
+        seg: 'ex',
+        titulo: 'Mail 3 de 3 — Balance, puerta abierta',
+        foco: 'Cierre del año, sin presión, con un dato concreto',
+        objetivo: 'Dejar la puerta abierta sin generar culpa. Meta: 1%+ de reactivación.',
+        asunto: 'Así cerramos el año en Redalco',
+        preview: 'Un balance corto, sin pedirte nada.',
+        copy: `Hola [Nombre],
+
+Este año la red que ayudaste a construir llegó a más de 400 organizaciones en todo Uruguay.
+
+No te escribimos para pedirte que vuelvas. Si en algún momento querés ser parte de nuevo, la puerta sigue abierta, sin vueltas.
+
+Gracias por lo que ya construiste.
+
+[CTA: Ver en qué estamos trabajando →]`
       },
       {
         id: 'dic26-leads',
@@ -1910,15 +2007,16 @@ Desde junio a diciembre, sin campaña, sin tele:
       }
     ],
     checklistExtra: [
-      'Armar las bases y el premio del sorteo de referidos',
-      'Configurar en EmailOctopus las 4 opciones de preferencia de Leads',
-      'Calcular el balance individual por socio (platos, meses, organizaciones)',
-      'Preparar la pieza de "regalar una membresía" para Navidad'
+      'Calcular el balance real del año por segmento (platos, kilos, organizaciones) antes de completar los copy',
+      'Coordinar que MP 2026 e Histórico no reciban el pedido en la misma semana',
+      'Armar las bases y el premio del sorteo de referidos de socios',
+      'Configurar en EmailOctopus las opciones de preferencia de Leads para 2027'
     ],
     notas: [
-      'El mail de Leads está en tuteo ("¿Quieres...?", "desuscríbeme"). Pasar a voseo antes de enviar.',
-      'La limpieza de lista baja el volumen pero sube la tasa de apertura de 2027: no leerlo como pérdida.',
-      'Reservar tiempo: el balance personalizado por socio requiere exportar datos, no es copiar y pegar.'
+      'Segundo y último pedido directo del período tanto para MP 2026 como para Histórico — no repetir un tercero en enero.',
+      'A socios nunca se les pide plata: el CTA de este mes es referir, no donar.',
+      'Tercer y último mail del período a Pausados/Baja — el próximo, si se agrega, recién en 2027.',
+      'El mail de Leads está en tuteo ("¿Quieres...?", "desuscríbeme"). Pasar a voseo antes de enviar.'
     ]
   },
 
@@ -1927,54 +2025,66 @@ Desde junio a diciembre, sin campaña, sin tele:
     id: 'ene27',
     nombre: 'Enero 2027',
     corto: 'Ene 27',
-    foco: 'Verano: mes corto y de baja actividad. Solo socios y donantes MP.',
+    foco: 'Verano y bienvenida a 2027. Cierre de la primera secuencia de conversión para MP 2026 e Histórico. Sin Pausados/Baja este mes (ya van 3 en el período).',
     emails: [
       {
         id: 'ene27-socios',
         seg: 'socios',
-        titulo: 'Mail #6 — El verano no para',
-        foco: 'El aporte de enero vale lo mismo que el de junio',
+        titulo: 'Mail #6 — Bienvenida a 2027',
+        foco: 'El aporte de enero vale lo mismo que el de junio, sin pedir nada',
         objetivo: 'Evitar bajas de verano. Meta: mantener la tasa de bajas debajo del 0,5%.',
-        asunto: 'Verano: el hambre no se toma vacaciones',
-        preview: 'Mientras estás en la playa, acá se sigue rescatando.',
+        asunto: 'Enero también cuenta',
+        preview: 'Mientras estás de vacaciones, la red sigue funcionando.',
         copy: `Hola [Nombre],
 
-Enero. Playas. Pero: **340.000 kg de frutas al tacho cada día**, igual.
+Enero. Vacaciones para casi todos. Para la red de Redalco, no: este mes también se rescataron frutas y verduras que llegaron a organizaciones de todo el país.
 
-Tu aporte de enero vale lo mismo que el de junio.
+Tu aporte de enero vale exactamente lo mismo que el de junio.
 
-Gracias por no perder perspectiva en verano.
+Gracias por no perder el ritmo en verano.
 
-[CTA: Fotos en Instagram →]`
+[CTA: Ver el trabajo del mes en Instagram →]`
       },
       {
         id: 'ene27-mp',
         seg: 'mp',
-        titulo: 'Mail #6 — Pedido tranquilo',
-        foco: 'Mes 7: la pregunta sin presión',
-        objetivo: 'Conversión de baja fricción. Meta: 1–2% de conversión.',
-        asunto: '7 meses después: ¿vimos que esto es real?',
-        preview: 'Una pregunta sin presión. Solo lúcida.',
+        titulo: 'Mail #5 — Cierre de la secuencia',
+        foco: 'Pieza corta antes de que el ciclo de Misión Platos 2027 empiece en junio',
+        objetivo: 'Última pieza de esta secuencia, sin insistir con el pedido. Meta: mantener el vínculo.',
+        asunto: 'Siete meses después, seguimos acá',
+        preview: 'Un cierre corto antes de que llegue junio otra vez.',
         copy: `Hola [Nombre],
 
-Verano. Tiempo de pensar con calma.
+Siete meses pasaron desde que donaste en Misión Platos. La red que ayudaste a construir en junio sigue funcionando hoy, en enero, sin pausa.
 
-Hace 7 meses viste que tu aporte funcionó. ¿Probamos mensual?
+No te vamos a insistir. Si en algún momento querés que sea todos los meses, la puerta sigue abierta.
 
-Dos meses. Si no te gusta, lo cancelas.
+[CTA: Quiero ser socio mensual →]`
+      },
+      {
+        id: 'ene27-hist',
+        seg: 'hist',
+        titulo: 'Mail 6 de 6 — Cierre de la secuencia',
+        foco: 'Pieza final, corta y directa, de esta primera secuencia',
+        objetivo: 'Cerrar el ciclo inicial dejando la puerta abierta. Meta: mantener el vínculo.',
+        asunto: 'Una última vez, sin vueltas',
+        preview: 'Si te mueve, todavía podés ser parte.',
+        copy: `Hola [Nombre],
 
-[CTA: Quiero intentar →]`
+No te vamos a volver a preguntar todos los meses. Pero antes de cerrar esta primera etapa, una vez más: si te mueve, podés ser parte de la red, no solo de una donación.
+
+[CTA: Quiero ser socio mensual →]`
       }
     ],
     checklistExtra: [
-      'Verificar el dato de 340.000 kg/día (el plan anual usa 125 millones de kg/año)',
-      'Revisar el asunto de socios: "hambre" no es una palabra que Redalco usa',
-      'Programar los envíos antes de las licencias del equipo'
+      'Revisar que ningún mail de este mes repita el pedido ya hecho dos veces a MP 2026/Histórico',
+      'Programar los envíos antes de las licencias del equipo',
+      'Definir si el segmento Histórico pasa a un flujo de mantenimiento (sin pedido) a partir de febrero'
     ],
     notas: [
-      '⚠️ El asunto dice "el hambre no se toma vacaciones". La voz de Redalco evita la palabra "hambre" y usa "inseguridad alimentaria". Reescribir antes de enviar.',
-      '125 millones de kg / 365 = ~342.000 kg por día: el dato cierra, pero conviene decirlo con la fuente que ya usa Redalco.',
-      'Mes de menor apertura del año en todo el sector: no comparar contra octubre y sacar conclusiones.'
+      'Cierra la primera secuencia de conversión para MP 2026 e Histórico: no se repite un tercer pedido en este mes.',
+      'Mes de menor apertura del año en todo el sector: no comparar contra octubre y sacar conclusiones.',
+      'A partir de febrero, este calendario queda fuera del alcance de esta revisión — feb27 en adelante sigue siendo el borrador anterior, pendiente.'
     ]
   },
 
@@ -3078,9 +3188,12 @@ function tarjetaEmail(email) {
     : candidatas.length
       ? '<select class="select-chico" data-asociar>' +
           '<option value="">Asociar campaña real…</option>' +
-          candidatas.map(c => '<option value="' + esc(claveCampana(c)) + '">' +
-            esc(fmtFecha(c.fechaEnvio ? c.fechaEnvio.slice(0, 10) : null) || 'Sin fecha') +
-            ' · ' + esc(c.plataforma) + ' · ' + fmtNum(c.destinatarios) + ' destinatarios</option>').join('') +
+          candidatas.map(c => {
+            const dest = c.destinatarios != null ? ' · ' + fmtNum(c.destinatarios) + ' dest.' : '';
+            return '<option value="' + esc(claveCampana(c)) + '">' +
+              esc(fmtFecha(c.fechaEnvio ? c.fechaEnvio.slice(0, 10) : null) || 'Sin fecha') +
+              ' · ' + esc(c.plataforma) + ' · ' + esc(c.asunto || '(sin nombre)') + dest + '</option>';
+          }).join('') +
         '</select>'
       : '';
 

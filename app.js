@@ -332,9 +332,12 @@ function tarjetaEmail(email) {
     : candidatas.length
       ? '<select class="select-chico" data-asociar>' +
           '<option value="">Asociar campaña real…</option>' +
-          candidatas.map(c => '<option value="' + esc(claveCampana(c)) + '">' +
-            esc(fmtFecha(c.fechaEnvio ? c.fechaEnvio.slice(0, 10) : null) || 'Sin fecha') +
-            ' · ' + esc(c.plataforma) + ' · ' + fmtNum(c.destinatarios) + ' destinatarios</option>').join('') +
+          candidatas.map(c => {
+            const dest = c.destinatarios != null ? ' · ' + fmtNum(c.destinatarios) + ' dest.' : '';
+            return '<option value="' + esc(claveCampana(c)) + '">' +
+              esc(fmtFecha(c.fechaEnvio ? c.fechaEnvio.slice(0, 10) : null) || 'Sin fecha') +
+              ' · ' + esc(c.plataforma) + ' · ' + esc(c.asunto || '(sin nombre)') + dest + '</option>';
+          }).join('') +
         '</select>'
       : '';
 
