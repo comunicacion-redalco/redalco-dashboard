@@ -48,6 +48,9 @@ const PATRONES_SEGMENTO_EMAILOCTOPUS = [
   { patron: /socios\s*mensuales/i, segmento: 'socios' },
   { patron: /donantes\s*pausad/i, segmento: 'ex' },
   { patron: /trivia/i, segmento: 'leads' },
+  // "DONANTES MS ..." = MP 2021–2025 + Ocasionales (confirmado con el
+  // usuario el 2026-08-19, ej. "DONANTES MS 21-25").
+  { patron: /donantes\s*ms\b/i, segmento: 'hist' },
 ];
 
 function segmentoDeEmailOctopus(nombre) {
