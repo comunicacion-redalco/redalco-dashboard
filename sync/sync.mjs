@@ -45,6 +45,21 @@ function segmentoDeMailchimp(recipients) {
   return { tagCrudo: tag, segmento: tag ? (MAPEO_TAGS_MAILCHIMP[tag] || null) : null };
 }
 
+// EmailOctopus no expone tag/segmento por API, pero el usuario nombra sus
+// campañas con el segmento adentro (ej. "13.08.26 TRIVIA", "28.07 SOCIOS
+// MENSUALES") — confirmado el 2026-08-19.
+const PATRONES_SEGMENTO_EMAILOCTOPUS = [
+  { patron: /misi[oó]n\s*platos/i, segmento: 'mp' },
+  { patron: /socios\s*mensuales/i, segmento: 'socios' },
+  { patron: /donantes\s*pausad/i, segmento: 'ex' },
+  { patron: /trivia/i, segmento: 'leads' },
+];
+
+function segmentoDeEmailOctopus(nombre) {
+  const hallado = PATRONES_SEGMENTO_EMAILOCTOPUS.find(p => p.patron.test(nombre || ''));
+  return hallado ? hallado.segmento : null;
+}
+
 async function traerMailchimp(apiKey) {
   const prefijo = apiKey.split('-').pop();
   const base = `https://${prefijo}.api.mailchimp.com/3.0`;
@@ -154,7 +169,7 @@ async function traerEmailOctopus(apiKey) {
       // eso se cruza aparte con los links especiales de cada campaña.
       conversion: null,
       listaNombre: (c.to || []).map(id => nombresLista[id]).filter(Boolean).join(', ') || null,
-      segmento: null,
+      segmento: segmentoDeEmailOctopus(c.name),
     };
   }));
   return reportes.filter(Boolean);

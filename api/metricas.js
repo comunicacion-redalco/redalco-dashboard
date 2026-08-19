@@ -37,6 +37,24 @@ function segmentoDeMailchimp(recipients) {
   return { tagCrudo: tag, segmento: tag ? (MAPEO_TAGS_MAILCHIMP[tag] || null) : null };
 }
 
+// EmailOctopus no expone tag/segmento por API (a diferencia de Mailchimp),
+// pero el usuario nombra sus campañas con el segmento adentro del nombre
+// (ej. "13.08.26 TRIVIA", "28.07 SOCIOS MENSUALES") — confirmado el
+// 2026-08-19. Se detecta por texto en vez de pedir que lo marque a mano
+// cada vez; lo que no matchea ningún patrón sigue quedando para marcar a
+// mano en el panel (ver app.js, [data-marcar-segmento]).
+const PATRONES_SEGMENTO_EMAILOCTOPUS = [
+  { patron: /misi[oó]n\s*platos/i, segmento: 'mp' },
+  { patron: /socios\s*mensuales/i, segmento: 'socios' },
+  { patron: /donantes\s*pausad/i, segmento: 'ex' },
+  { patron: /trivia/i, segmento: 'leads' },
+];
+
+function segmentoDeEmailOctopus(nombre) {
+  const hallado = PATRONES_SEGMENTO_EMAILOCTOPUS.find(p => p.patron.test(nombre || ''));
+  return hallado ? hallado.segmento : null;
+}
+
 async function traerMailchimp(apiKey) {
   const prefijo = apiKey.split('-').pop();
   const base = `https://${prefijo}.api.mailchimp.com/3.0`;
@@ -149,10 +167,8 @@ async function traerEmailOctopus(apiKey) {
       // La API no trae conversión a socio ni plata recaudada: pendiente
       // definir el cruce con los links especiales por campaña.
       conversion: null,
-      // EmailOctopus no expone tags por campaña como Mailchimp — solo la
-      // lista a la que se mandó. Sin mapeo automático a segmento todavía.
       listaNombre: (c.to || []).map(id => nombresLista[id]).filter(Boolean).join(', ') || null,
-      segmento: null,
+      segmento: segmentoDeEmailOctopus(c.name),
     };
   }));
   return reportes.filter(Boolean);
