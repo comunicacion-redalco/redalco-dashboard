@@ -208,7 +208,7 @@ Gracias por seguir siendo parte.
     id: 'sep26',
     nombre: 'Septiembre 2026',
     corto: 'Set 26',
-    foco: 'Día Internacional de Concientización sobre la Pérdida y el Desperdicio de Alimentos (29/9, ONU) — hueco real del calendario anterior, ahora cubierto. Sin Pausados/Baja este mes.',
+    foco: 'Día Internacional de Concientización sobre la Pérdida y el Desperdicio de Alimentos (29/9, ONU) — hueco real del calendario anterior, ahora cubierto. Sin Pausados/Baja en la secuencia regular este mes (sí recibe el mail puntual de 10° aniversario).',
     emails: [
       {
         id: 'sep26-socios',
@@ -286,18 +286,110 @@ Para ella es libertad. Para los chicos que comen, es que alguien se importa.
 ¿Vos querés importarte también?
 
 [CTA: Quiero sumarlme — $250 al mes →]`
+      },
+      {
+        id: 'sep26-socios-10anios',
+        seg: 'socios',
+        titulo: 'Mail #3 — 10° aniversario',
+        foco: '10 años de Redalco + reconocimiento Héroes Contemporáneos del Bicentenario',
+        objetivo: 'Compartir un orgullo colectivo, sin pedir nada. Meta: 30%+ de apertura.',
+        asunto: 'Hoy cumplimos 10 años 💚',
+        preview: 'Una noticia que nos emociona compartir con vos justo hoy.',
+        copy: `**Hoy cumplimos 10 años. Y recibimos una de esas noticias que hacen que el día sea todavía más especial. 💚**
+
+Redalco fue reconocido como Héroe Contemporáneo del Bicentenario.
+
+Después de una década rescatando alimentos y construyendo una red junto a productores, voluntarios, organizaciones, empresas, socios y tantas personas, recibir este reconocimiento justo hoy nos emociona muchísimo.
+
+Lo recibimos nosotros, pero pertenece a todos los que hicieron posible estos 10 años.
+
+**Gracias por construir Redalco con nosotros.**`
+      },
+      {
+        id: 'sep26-mp-10anios',
+        seg: 'mp',
+        titulo: 'Mail #3 — 10° aniversario',
+        foco: '10 años de Redalco + reconocimiento Héroes Contemporáneos del Bicentenario',
+        objetivo: 'Sostener el vínculo con un hito real de la organización, sin pedir nada. Meta: 26%+ de apertura.',
+        asunto: 'Hoy cumplimos 10 años 💚',
+        preview: 'Una noticia que nos emociona compartir con vos justo hoy.',
+        copy: `**Hoy cumplimos 10 años. Y recibimos una de esas noticias que hacen que el día sea todavía más especial. 💚**
+
+Redalco fue reconocido como Héroe Contemporáneo del Bicentenario.
+
+Después de una década rescatando alimentos y construyendo una red junto a productores, voluntarios, organizaciones, empresas, socios y tantas personas, recibir este reconocimiento justo hoy nos emociona muchísimo.
+
+Lo recibimos nosotros, pero pertenece a todos los que hicieron posible estos 10 años.
+
+**Gracias por construir Redalco con nosotros.**`
+      },
+      {
+        id: 'sep26-hist-10anios',
+        seg: 'hist',
+        titulo: 'Mail 3 de 6 — 10° aniversario',
+        foco: '10 años de Redalco + reconocimiento Héroes Contemporáneos del Bicentenario',
+        objetivo: 'Reconectar con un hito real de la organización, sin pedir nada. Meta: 22%+ de apertura.',
+        asunto: 'Hoy cumplimos 10 años 💚',
+        preview: 'Una noticia que nos emociona compartir con vos justo hoy.',
+        copy: `**Hoy cumplimos 10 años. Y recibimos una de esas noticias que hacen que el día sea todavía más especial. 💚**
+
+Redalco fue reconocido como Héroe Contemporáneo del Bicentenario.
+
+Después de una década rescatando alimentos y construyendo una red junto a productores, voluntarios, organizaciones, empresas, socios y tantas personas, recibir este reconocimiento justo hoy nos emociona muchísimo.
+
+Lo recibimos nosotros, pero pertenece a todos los que hicieron posible estos 10 años.
+
+**Gracias por construir Redalco con nosotros.**`
+      },
+      {
+        id: 'sep26-leads-10anios',
+        seg: 'leads',
+        titulo: 'Mail #3 — 10° aniversario',
+        foco: '10 años de Redalco + reconocimiento Héroes Contemporáneos del Bicentenario',
+        objetivo: 'Reforzar la credibilidad de la organización con un hito real, sin pedir nada. Meta: 20%+ de apertura.',
+        asunto: 'Hoy cumplimos 10 años 💚',
+        preview: 'Una noticia que nos emociona compartir con vos justo hoy.',
+        copy: `**Hoy cumplimos 10 años. Y recibimos una de esas noticias que hacen que el día sea todavía más especial. 💚**
+
+Redalco fue reconocido como Héroe Contemporáneo del Bicentenario.
+
+Después de una década rescatando alimentos y construyendo una red junto a productores, voluntarios, organizaciones, empresas, socios y tantas personas, recibir este reconocimiento justo hoy nos emociona muchísimo.
+
+Lo recibimos nosotros, pero pertenece a todos los que hicieron posible estos 10 años.
+
+**Gracias por construir Redalco con nosotros.**`
+      },
+      {
+        id: 'sep26-ex-10anios',
+        seg: 'ex',
+        titulo: 'Mail #1 — 10° aniversario',
+        foco: '10 años de Redalco + reconocimiento Héroes Contemporáneos del Bicentenario — excepción a la cadencia espaciada del segmento, por el hito',
+        objetivo: 'Mostrar impacto real de la organización (nunca "te extrañamos"), sin pedir nada. Meta: 18%+ de apertura, sin picos de bajas.',
+        asunto: 'Hoy cumplimos 10 años 💚',
+        preview: 'Una noticia que nos emociona compartir con vos justo hoy.',
+        copy: `**Hoy cumplimos 10 años. Y recibimos una de esas noticias que hacen que el día sea todavía más especial. 💚**
+
+Redalco fue reconocido como Héroe Contemporáneo del Bicentenario.
+
+Después de una década rescatando alimentos y construyendo una red junto a productores, voluntarios, organizaciones, empresas, socios y tantas personas, recibir este reconocimiento justo hoy nos emociona muchísimo.
+
+Lo recibimos nosotros, pero pertenece a todos los que hicieron posible estos 10 años.
+
+**Gracias por construir Redalco con nosotros.**`
       }
     ],
     checklistExtra: [
       'Confirmar que el segmento Histórico tiene trazabilidad real (~48h) del rescate antes de prometerlo en el copy',
       'Coordinar con el equipo de la UAM la capacidad de voluntarios por jueves',
       'Conseguir la historia real de la cocinera (nombre + organización + foto)',
-      'Corregir el typo del CTA de Leads: "sumarlme" → "sumarme"'
+      'Corregir el typo del CTA de Leads: "sumarlme" → "sumarme"',
+      'Mail de 10° aniversario: coordinar fecha exacta de envío con el anuncio del reconocimiento (no mandar antes de que sea público)'
     ],
     notas: [
-      'Este mes no va mail a Pausados/Baja (cadencia espaciada) ni pedido al Histórico — recién en octubre.',
+      'Este mes no va mail de la secuencia regular a Pausados/Baja (cadencia espaciada) ni pedido al Histórico — recién en octubre.',
       'Es el primer pedido de plata del período, y solo a Leads. Socios, MP 2026 e Histórico siguen sin pedido.',
-      'Día Internacional de Concientización sobre la Pérdida y el Desperdicio de Alimentos: 29 de septiembre (ONU).'
+      'Día Internacional de Concientización sobre la Pérdida y el Desperdicio de Alimentos: 29 de septiembre (ONU).',
+      '⚠️ El mail de 10° aniversario SÍ va a los 5 segmentos, incluido Pausados/Baja — es una excepción puntual a la cadencia espaciada de ese segmento, por tratarse de un hito único (no una campaña de pedido).'
     ]
   },
 
