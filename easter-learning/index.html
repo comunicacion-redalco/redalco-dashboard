@@ -72,7 +72,8 @@
 
     .subtitle {
       margin-top: 18px;
-      font-size: clamp(1.1rem, 4.8vw, 1.5rem);
+      font-size: clamp(1rem, 4.6vw, 1.5rem);
+      white-space: nowrap;
     }
 
     /* ---------- Píldora "Análisis completado" ---------- */
@@ -113,17 +114,22 @@
 
     /* ---------- Mensaje ---------- */
     .message {
-      margin-top: 56px;
+      margin-top: 36px;
       font-size: clamp(1rem, 4.3vw, 1.2rem);
-      line-height: 1.3;
+      line-height: 1.35;
+      text-wrap: balance;
     }
+    .message p { text-wrap: balance; }
+    .message p:first-child { max-width: 31ch; margin-inline: auto; }
+    .br-pc { display: none; }   /* en celular el texto corre seguido */
+    .title, .subtitle { text-wrap: balance; }
 
-    .message p + p { margin-top: 16px; }
+    .message p + p { margin-top: 12px; }
 
-    .welcome { margin-top: 22px; }
+    .welcome { margin-top: 20px; }
 
     /* ---------- Logo Easter Learning ---------- */
-    .brand__img { display:block; width:min(88vw, 520px); height:auto; }
+    .brand__img { display:block; width:min(82vw, 440px); height:auto; }
     .brand {
       margin-top: 12px;
       font-family: var(--font-display);
@@ -235,6 +241,8 @@
       .content { max-width: 760px; }
       .title { font-size: 4.4rem; }
       .message { margin-top: 48px; }
+      .message p:first-child { max-width: none; }
+      .br-pc { display: inline; }
       .brand__img { width: 440px; }
 
       .eye {
@@ -264,7 +272,7 @@
 
         <div class="message">
           <p class="reveal d3">
-            Este contenido no estaba incluido en los minutos del caso,<br>
+            Este contenido no estaba incluido en los minutos del caso,<br class="br-pc">
             pero la curiosidad no entiende de límites de tiempo.
           </p>
           <p class="reveal d4">Definitivamente, entendiste la campaña:</p>
